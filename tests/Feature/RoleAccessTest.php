@@ -30,14 +30,14 @@ test('admins can also use the cashier screen', function () {
     $this->actingAs(User::factory()->admin()->create())
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('Back to admin panel');
+        ->assertSee('Admin management');
 });
 
 test('cashiers do not see the admin shortcut', function () {
     $this->actingAs(User::factory()->cashier()->create())
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertDontSee('Back to admin panel');
+        ->assertDontSee('Admin management');
 });
 
 test('a cashier cannot change menu data through the admin routes', function () {

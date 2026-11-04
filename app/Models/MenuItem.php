@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Database\Factories\MenuItemFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,11 +10,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['category_id', 'name', 'description', 'price', 'image_path', 'is_available'])]
 class MenuItem extends Model
 {
     /** @use HasFactory<MenuItemFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'category_id',
+        'name',
+        'description',
+        'price',
+        'image_path',
+        'is_available',
+    ];
 
     /**
      * Get the attributes that should be cast.

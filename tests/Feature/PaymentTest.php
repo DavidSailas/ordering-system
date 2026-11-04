@@ -21,7 +21,8 @@ test('cashiers can confirm a cash payment once and see the change', function () 
     $order->refresh();
 
     expect($order->paid_by)->toBe($cashier->id)
-        ->and($order->payment_method)->toBe(PaymentMethod::Cash)
+        ->and($order->payment_method)->toBe('cash')
+        ->and($order->paymentMethodOrCash())->toBe(PaymentMethod::Cash)
         ->and($order->amount_paid)->toBe('150.00')
         ->and($order->cash_received)->toBe('200.00');
 
@@ -78,7 +79,8 @@ test('gcash and maya payments need a reference but no cash', function () {
 
     $order->refresh();
 
-    expect($order->payment_method)->toBe(PaymentMethod::GCash)
+    expect($order->payment_method)->toBe('gcash')
+        ->and($order->paymentMethodOrCash())->toBe(PaymentMethod::GCash)
         ->and($order->payment_reference)->toBe('GC-12345')
         ->and($order->cash_received)->toBeNull();
 });

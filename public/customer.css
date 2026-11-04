@@ -254,3 +254,30 @@ label{font-weight:600;font-size:14px}
   .topbar-info{display:none}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- Pay with GCash / Maya ---------- */
+.cb-pay-page{max-width:1000px;margin:0 auto}
+.pay-fieldset{margin:0;padding:0;border:0}
+.pay-fieldset legend{margin-bottom:10px;padding:0;font-size:14px;font-weight:600}
+.pay-methods{display:grid;gap:10px}
+.pay-method{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;transition:border-color .15s,background .15s}
+.pay-method:hover{border-color:var(--brand-line)}
+.pay-method input{width:18px;height:18px;margin:0;accent-color:var(--brand)}
+.pay-method:has(input:checked){border-color:var(--brand);background:var(--brand-tint)}
+.pay-method-body{display:flex;flex-direction:column}
+.pay-method-body strong{font-size:15px}
+.pay-method-body small{color:var(--muted);font-size:13px}
+.pay-step{display:flex;gap:16px;padding:6px 0 22px}
+.pay-step+.pay-step{padding-top:22px;border-top:1px solid var(--line-soft)}
+.pay-step>div{flex:1;min-width:0}
+.pay-step-no{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;font-weight:700;font-size:14px}
+.pay-step h2{margin-bottom:4px}
+.pay-account{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:14px;padding:16px 18px;border:1px solid var(--brand-line);border-radius:10px;background:var(--brand-tint)}
+.pay-account small{display:block;color:var(--muted);font-size:12px}
+.pay-account strong{display:block;font-size:24px;letter-spacing:.04em}
+.pay-account span{color:var(--ink-2);font-size:14px}
+.pay-qr{width:180px;height:180px;margin-top:14px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#fff}
+.pay-secure{color:var(--muted);font-size:13px}
+.cb-order-pay{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:16px;padding:14px 16px;border:1px solid var(--brand-line);border-radius:10px;background:var(--brand-tint);font-size:14px;color:var(--ink-2)}
+.cb-order-pay-actions{display:flex;flex-wrap:wrap;gap:8px}
+@media(max-width:560px){.cb-order-pay{flex-direction:column;align-items:stretch}.cb-order-pay-actions .button{flex:1}}

@@ -17,6 +17,8 @@ Route::post('/checkout', [\App\Http\Controllers\StorefrontController::class, 'pu
 Route::get('/my-profile', [\App\Http\Controllers\StorefrontController::class, 'profile'])->name('shop.profile');
 Route::post('/my-profile', [\App\Http\Controllers\StorefrontController::class, 'updateProfile'])->middleware('throttle:10,1')->name('shop.profile.update');
 Route::get('/my-orders', [\App\Http\Controllers\StorefrontController::class, 'orders'])->name('shop.orders');
+Route::get('/my-orders/{order}/pay/{method}', [\App\Http\Controllers\StorePaymentController::class, 'show'])->whereIn('method', ['gcash', 'maya'])->name('shop.pay');
+Route::post('/my-orders/{order}/pay/{method}', [\App\Http\Controllers\StorePaymentController::class, 'store'])->whereIn('method', ['gcash', 'maya'])->middleware('throttle:10,1')->name('shop.pay.store');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');

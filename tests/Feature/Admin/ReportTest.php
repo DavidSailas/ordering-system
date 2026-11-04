@@ -10,12 +10,13 @@ beforeEach(function () {
     $this->actingAs(User::factory()->admin()->create());
 });
 
-test('the dashboard summarises todays sales without counting canceled orders', function () {
+test('the dashboard shows todays paid sales without counting refunded or unpaid orders', function () {
     $cashier = User::factory()->cashier()->create(['name' => 'Casey Cashier']);
 
-    Order::factory()->create(['user_id' => $cashier->id, 'total' => 40]);
-    Order::factory()->status(OrderStatus::Completed)->create(['user_id' => $cashier->id, 'total' => 10.5]);
-    Order::factory()->status(OrderStatus::Canceled)->create(['user_id' => $cashier->id, 'total' => 999]);
+    Order::factory()->create(['user_id' => $cashier->id, 'total' => 40, 'paid_at' => now(), 'amount_paid' => 40]);
+    Order::factory()->status(OrderStatus::Completed)->create(['user_id' => $cashier->id, 'total' => 10.5, 'paid_at' => now(), 'amount_paid' => 10.5]);
+    Order::factory()->status(OrderStatus::Canceled)->create(['user_id' => $cashier->id, 'total' => 999, 'paid_at' => now(), 'amount_paid' => 999, 'refunded_at' => now()]);
+    Order::factory()->create(['user_id' => $cashier->id, 'total' => 500]); // not paid yet
 
     $this->get(route('admin.dashboard'))
         ->assertOk()

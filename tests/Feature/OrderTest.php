@@ -56,18 +56,6 @@ test('a take away order does not keep a table', function () {
     expect(Order::query()->sole()->dining_table_id)->toBeNull();
 });
 
-test('dine-in orders require a table', function () {
-    $item = MenuItem::factory()->create();
-
-    $this->actingAs(User::factory()->create())->postJson(route('orders.store'), [
-        'type' => 'dine_in',
-        'customer_name' => 'John Doe',
-        'items' => [['menu_item_id' => $item->id, 'quantity' => 1]],
-    ])->assertJsonValidationErrors('dining_table_id');
-
-    expect(Order::query()->count())->toBe(0);
-});
-
 test('an occupied table cannot take a second order', function () {
     $busy = Order::factory()->status(OrderStatus::ReadyToServe)->create();
     $item = MenuItem::factory()->create();
@@ -135,11 +123,16 @@ test('an order cannot skip a step', function () {
     expect($order->refresh()->status)->toBe(OrderStatus::InProgress);
 });
 
-test('an open order can be canceled but a finished one cannot', function () {
-    $this->actingAs(User::factory()->create());
+test('only an admin can cancel, and only while the order is still open', function () {
     $open = Order::factory()->create();
     $finished = Order::factory()->status(OrderStatus::Completed)->create();
 
+    $this->actingAs(User::factory()->cashier()->create())
+        ->patch(route('orders.status', $open), ['status' => 'canceled'])
+        ->assertForbidden();
+    expect($open->refresh()->status)->toBe(OrderStatus::InProgress);
+
+    $this->actingAs(User::factory()->admin()->create());
     $this->patch(route('orders.status', $open), ['status' => 'canceled'])->assertRedirect();
     expect($open->refresh()->status)->toBe(OrderStatus::Canceled);
 

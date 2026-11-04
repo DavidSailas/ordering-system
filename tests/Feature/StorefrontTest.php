@@ -14,7 +14,7 @@ test('guests can browse and update their cart', function () {
 test('checkout uses catalog prices and records order lines', function () {
     $food = MenuItem::factory()->create(['price' => 125.50]);
     $this->withSession(['shop.cart' => [$food->id => 2], 'shop.checkout_token' => 'test-token'])
-        ->post('/checkout', ['customer_name' => 'Jonna', 'phone' => '09123456789', 'checkout_token' => 'test-token', 'total' => 1])
+        ->post('/checkout', ['customer_name' => 'Jonna', 'phone' => '09123456789', 'checkout_token' => 'test-token', 'payment_choice' => 'cash', 'total' => 1])
         ->assertRedirect(route('shop.orders'))->assertSessionMissing('shop.cart');
     $order = Order::firstOrFail();
     expect($order->total)->toBe('251.00');

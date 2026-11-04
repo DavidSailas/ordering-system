@@ -13,5 +13,20 @@
       <div><span><b>{{ $item->quantity }}×</b> {{ $item->name }}</span><strong>₱{{ number_format($item->price * $item->quantity, 2) }}</strong></div>
     @endforeach
   </div>
-  <div class="cb-order-card-bottom"><div><small>{{ $order->paid_at ? 'Payment recorded' : 'Payment at pickup' }}</small><strong>₱{{ number_format($order->total, 2) }}</strong></div><p>@switch($order->status->value) @case('ready_to_serve') Your order is ready for pickup! @break @case('completed') Thank you for ordering with us! @break @case('canceled') This order was cancelled. @break @default We're preparing your order. @endswitch</p></div>
+  <div class="cb-order-card-bottom"><div><small>@if($order->paid_at) Paid{{ in_array($order->payment_method, ['gcash', 'maya']) ? ' via '.($order->payment_method === 'gcash' ? 'GCash' : 'Maya') : '' }} @elseif($order->customer_payment_ref) {{ $order->payment_choice === 'gcash' ? 'GCash' : 'Maya' }} payment submitted · awaiting confirmation @elseif(in_array($order->payment_choice, ['gcash', 'maya'])) Awaiting {{ $order->payment_choice === 'gcash' ? 'GCash' : 'Maya' }} payment @else Payment at pickup @endif</small><strong>₱{{ number_format($order->total, 2) }}</strong></div><p>@switch($order->status->value) @case('ready_to_serve') Your order is ready for pickup! @break @case('completed') Thank you for ordering with us! @break @case('canceled') This order was cancelled. @break @default We're preparing your order. @endswitch</p></div>
+  @php $payAccounts = \App\Support\StorePayments::available(); @endphp
+  @if(!$order->paid_at && $order->status->value !== 'canceled' && $payAccounts)
+    <div class="cb-order-pay">
+      @if($order->customer_payment_ref)
+        <span>Reference <strong>{{ $order->customer_payment_ref }}</strong> sent. The cashier will confirm it shortly.</span>
+      @else
+        <span>Prefer to pay now instead of at pickup?</span>
+      @endif
+      <div class="cb-order-pay-actions">
+        @foreach($payAccounts as $key => $account)
+          <a class="button {{ $order->customer_payment_ref && $order->payment_choice === $key ? 'secondary' : '' }}" href="{{ route('shop.pay', [$order, $key]) }}">{{ $order->customer_payment_ref && $order->payment_choice === $key ? 'Update '.$account['label'].' reference' : 'Pay with '.$account['label'] }}</a>
+        @endforeach
+      </div>
+    </div>
+  @endif
 </article>

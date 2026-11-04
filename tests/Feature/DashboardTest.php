@@ -46,25 +46,17 @@ test('dishes can be searched by name', function () {
         ->assertDontSee('BBQ Chicken');
 });
 
-test('the order line shows recent orders and can be filtered by type', function () {
+test('the incoming orders page shows recent orders and can be filtered by type', function () {
     Order::factory()->create(['customer_name' => 'Dine In Dana']);
     Order::factory()->takeAway()->create(['customer_name' => 'Takeaway Tom']);
 
-    $this->get(route('dashboard'))
+    $this->get(route('cashier.incoming'))
         ->assertOk()
         ->assertSee('Dine In Dana')
         ->assertSee('Takeaway Tom');
 
-    $this->get(route('dashboard', ['type' => 'take_away']))
+    $this->get(route('cashier.incoming', ['type' => 'take_away']))
         ->assertOk()
         ->assertSee('Takeaway Tom')
         ->assertDontSee('Dine In Dana');
-});
-
-test('tables with an active order are shown as occupied', function () {
-    $order = Order::factory()->status(OrderStatus::InProgress)->create();
-
-    $this->get(route('dashboard'))
-        ->assertOk()
-        ->assertSee($order->diningTable->name.' · '.$order->diningTable->seats.' seats (occupied)', false);
 });

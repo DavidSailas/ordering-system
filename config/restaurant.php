@@ -39,6 +39,21 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Customer Payment Accounts
+    |--------------------------------------------------------------------------
+    |
+    | The store's GCash / Maya numbers shown to customers who choose to pay
+    | online. A method with no number set is hidden from the customer.
+    |
+    */
+
+    'payments' => [
+        'gcash' => ['label' => 'GCash', 'number' => env('STORE_GCASH_NUMBER'), 'name' => env('STORE_GCASH_NAME', env('RESTAURANT_NAME', 'Cecilian Bites'))],
+        'maya' => ['label' => 'Maya', 'number' => env('STORE_MAYA_NUMBER'), 'name' => env('STORE_MAYA_NAME', env('RESTAURANT_NAME', 'Cecilian Bites'))],
+    ],
+
     'admin_registration_code' => env('ADMIN_REGISTRATION_CODE'),
     'public_staff_registration' => env('PUBLIC_STAFF_REGISTRATION', false),
 

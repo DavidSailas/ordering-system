@@ -3,16 +3,21 @@
 namespace App\Models;
 
 use Database\Factories\OrderItemFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['order_id', 'menu_item_id', 'name', 'price', 'quantity'])]
 class OrderItem extends Model
 {
     /** @use HasFactory<OrderItemFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = ['order_id', 'menu_item_id', 'name', 'price', 'quantity'];
 
     /**
      * Get the attributes that should be cast.

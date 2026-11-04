@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 class PaymentController extends Controller {
  public function show(Order $order) { return view('Cashier.payment',['order'=>$order->load('items')]); }
+ public function receipt(Request $request, Order $order) { return view('Cashier.receipt',['order'=>$order->load('items'),'autoprint'=>$request->boolean('print')]); }
  public function store(Request $request, Order $order) {
   $data=$request->validate(['payment_method'=>['required',Rule::in(['cash','gcash','maya'])], 'cash_received'=>['nullable','numeric','decimal:0,2','min:0','max:99999999.99'], 'payment_reference'=>['nullable','string','max:100'], 'discount'=>['nullable','numeric','decimal:0,2','min:0','max:99999999.99']]);
   DB::transaction(function() use($order,$request,$data) {
@@ -20,6 +21,7 @@ class PaymentController extends Controller {
    if($method==='cash' && $cash<$due) throw ValidationException::withMessages(['cash_received'=>'Cash must cover the discounted total.']);
    if($method!=='cash' && blank($data['payment_reference']??null)) throw ValidationException::withMessages(['payment_reference'=>'Enter the verified transaction reference.']);
    $locked->update(['paid_at'=>now(),'paid_by'=>$request->user()->id,'payment_method'=>$method,'payment_reference'=>$method==='cash'?null:$data['payment_reference'], 'discount'=>$discount/100,'amount_paid'=>$due/100,'cash_received'=>$method==='cash'?$cash/100:null]);
+   if($locked->status===OrderStatus::ReadyToServe) $locked->update(['status'=>OrderStatus::Completed]);
   });
   return redirect()->route('orders.payment',$order)->with('success','Payment recorded.');
  }

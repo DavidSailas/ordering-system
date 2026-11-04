@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 use App\Models\MenuItem;
 use App\Models\Order;
+use App\Support\StorePayments;
 use App\Enums\OrderType;
 use App\Enums\OrderStatus;
 use Illuminate\Http\Request;
@@ -45,7 +46,8 @@ class StorefrontController extends Controller
     }
     public function purchase(Request $request)
     {
-        $data = $request->validate(['customer_name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'regex:/^[0-9+() \-]{7,25}$/'], 'notes' => ['nullable', 'string', 'max:1000'], 'checkout_token' => ['required', 'string']]);
+        $data = $request->validate(['customer_name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'regex:/^[0-9+() \-]{7,25}$/'], 'notes' => ['nullable', 'string', 'max:1000'], 'payment_choice' => ['required', 'in:cash,gcash,maya'], 'checkout_token' => ['required', 'string']]);
+        if ($data['payment_choice'] !== 'cash' && ! array_key_exists($data['payment_choice'], StorePayments::available())) { throw ValidationException::withMessages(['payment_choice' => 'That payment option is not available right now.']); }
         $order = DB::transaction(function () use ($request, $data) {
             if (!hash_equals((string) $request->session()->get('shop.checkout_token', ''), $data['checkout_token'])) { throw ValidationException::withMessages(['cart' => 'This checkout has already been submitted.']); }
             $cart = $request->session()->get('shop.cart', []);
@@ -54,13 +56,14 @@ class StorefrontController extends Controller
             if ($foods->count() !== count($cart) || $foods->contains(fn ($food) => !$food->is_available)) { throw ValidationException::withMessages(['cart' => 'An item is no longer available. Please review your cart.']); }
             $total = 0;
             foreach ($cart as $id => $quantity) { $total += (int) round((float) $foods[$id]->price * 100) * $quantity; }
-            $order = Order::create(['customer_name' => $data['customer_name'], 'type' => OrderType::TakeAway, 'status' => OrderStatus::InProgress, 'notes' => 'Website pickup. Pay at pickup. Phone: '.$data['phone']."\n".($data['notes'] ?? ''), 'total' => $total / 100]);
+            $order = Order::create(['customer_name' => $data['customer_name'], 'type' => OrderType::TakeAway, 'status' => OrderStatus::InProgress, 'payment_choice' => $data['payment_choice'], 'notes' => 'Website pickup. '.($data['payment_choice'] === 'cash' ? 'Pay at pickup.' : 'Paying via '.strtoupper($data['payment_choice']).'.').' Phone: '.$data['phone']."\n".($data['notes'] ?? ''), 'total' => $total / 100]);
             foreach ($cart as $id => $quantity) { $food = $foods[$id]; $order->items()->create(['menu_item_id' => $id, 'name' => $food->name, 'price' => $food->price, 'quantity' => $quantity]); }
             return $order;
         });
         $request->session()->put('shop.profile', ['customer_name' => $data['customer_name'], 'phone' => $data['phone']]);
         $request->session()->push('shop.orders', $order->id);
         $request->session()->forget(['shop.cart', 'shop.checkout_token']);
+        if ($data['payment_choice'] !== 'cash') { return redirect()->route('shop.pay', [$order, $data['payment_choice']])->with('success', 'Order #'.$order->number.' placed! Send your payment below to complete it.'); }
         return redirect()->route('shop.orders')->with('success', 'Order #'.$order->number.' placed! Payment is due at pickup.');
     }
     public function profile(Request $request)

@@ -30,7 +30,7 @@ class OrderController extends Controller
         $order = DB::transaction(function () use ($request, $type, $lines, $menuItems): Order {
             $order = Order::create([
                 'user_id' => $request->user()->id,
-                'dining_table_id' => null,
+                'dining_table_id' => $type === OrderType::DineIn ? $request->validated('dining_table_id') : null,
                 'customer_name' => $request->validated('customer_name'),
                 'type' => $type,
                 'status' => OrderStatus::InProgress,
@@ -74,6 +74,9 @@ class OrderController extends Controller
             $locked = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
             if ($locked->paid_at && $status === OrderStatus::Canceled) {
                 return 'A paid order cannot be canceled without a refund workflow.';
+            }
+            if ($status === OrderStatus::Completed && ! $locked->paid_at) {
+                return 'Order #'.$locked->number.' must be paid before it can be completed.';
             }
             if (! $locked->status->canTransitionTo($status)) {
                 return 'Order #'.$locked->number.' cannot move from '.$locked->status->label().' to '.$status->label().'.';

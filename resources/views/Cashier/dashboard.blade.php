@@ -156,7 +156,7 @@
                                         </form>
                                     @endif
                                 </div>
-                                <a href="{{ route('orders.payment', $order) }}" class="mt-3 block rounded-full bg-violet-100 px-3 py-1 text-center text-sm font-medium">{{ $order->paid_at ? 'Paid · Receipt' : 'Unpaid · Collect payment' }}</a>
+                                <a href="{{ route('orders.payment', $order) }}" class="mt-3 block rounded-full bg-violet-100 px-3 py-1 text-center text-sm font-medium">{{ $order->paid_at ? 'Paid · Receipt' : ($order->customer_payment_ref ? 'Unpaid · '.strtoupper($order->payment_choice).' ref sent' : 'Unpaid · Collect payment') }}</a>
                             </article>
                         @endforeach
                     @else

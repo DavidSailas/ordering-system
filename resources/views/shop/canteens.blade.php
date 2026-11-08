@@ -9,6 +9,7 @@
     <x-favicon />
     <link rel="stylesheet" href="{{ asset('customer.css') }}">
     <link rel="stylesheet" href="{{ asset('ui.css') }}?v={{ @filemtime(public_path('ui.css')) }}">
+    <link rel="stylesheet" href="{{ asset('clean-scrollbars.css') }}">
 </head>
 <body class="picker-body">
 <header class="picker-bar">

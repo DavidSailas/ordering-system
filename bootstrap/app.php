@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Railway terminates HTTPS at its proxy; trust it so Laravel builds https:// URLs.
         $middleware->trustProxies(at: '*');
 
         $middleware->alias([

@@ -150,7 +150,10 @@ class MockDataSeeder extends Seeder
                 'sort_order' => $sort++,
             ]);
 
-            foreach ($dishes as [$name, $price, $description]) {
+            foreach ($dishes as $dish) {
+                $name = $dish[0];
+                $price = $dish[1];
+                $description = $dish[2] ?? null;
                 $imagePath = null;
                 $source = database_path('seeders/images/'.Str::slug($name).'.webp');
 

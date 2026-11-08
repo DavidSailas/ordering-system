@@ -51,7 +51,10 @@
         <div class="row"><span>Order #</span><span>{{ $order->number }}</span></div>
         <div class="row"><span>Date</span><span>{{ ($order->paid_at ?? $order->created_at)->format('M d, Y h:i A') }}</span></div>
         <div class="row"><span>Customer</span><span>{{ $order->customer_name }}</span></div>
-        <div class="row"><span>Type</span><span>{{ $order->type->label() }}@if ($order->diningTable) · {{ $order->diningTable->name }}@endif</span></div>
+        <div class="row"><span>Type</span><span>{{ $order->type->label() }}</span></div>
+        @if ($order->location)
+            <div class="row"><span>Deliver to</span><span>{{ $order->location }}</span></div>
+        @endif
         @if ($order->cashier)
             <div class="row"><span>Cashier</span><span>{{ $order->cashier->name }}</span></div>
         @endif

@@ -43,13 +43,7 @@
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         @forelse ($items as $item)
             <article class="flex gap-3 rounded-2xl bg-white p-2 shadow-sm {{ $item->is_available ? '' : 'opacity-70' }}">
-                @if ($item->image_url)
-                    <img src="{{ $item->image_url }}" alt="{{ $item->name }}" loading="lazy" class="size-24 shrink-0 rounded-xl object-cover">
-                @else
-                    <div class="grid size-24 shrink-0 place-items-center rounded-xl bg-linear-to-br from-lime-200 to-violet-200 text-3xl font-semibold text-neutral-700">
-                        {{ Str::upper(Str::substr($item->name, 0, 1)) }}
-                    </div>
-                @endif
+                <x-dish-image :item="$item" thumb />
 
                 <div class="flex min-w-0 flex-1 flex-col justify-between py-1">
                     <div>
@@ -73,7 +67,7 @@
                             <x-icon name="pencil" class="size-4" />
                         </a>
 
-                        <form method="POST" action="{{ route('admin.foods.destroy', $item) }}" onsubmit="return confirm('Delete {{ addslashes($item->name) }} from the menu?')">
+                        <form method="POST" action="{{ route('admin.foods.destroy', $item) }}" data-confirm="Delete {{ $item->name }} from the menu?" data-confirm-title="Delete this item?" data-confirm-ok="Yes, delete">
                             @csrf
                             @method('DELETE')
                             <button type="submit" aria-label="Delete {{ $item->name }}" class="grid size-8 place-items-center rounded-full bg-neutral-100 hover:bg-rose-100 hover:text-rose-600">

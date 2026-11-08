@@ -39,7 +39,7 @@
                 <tr class="border-b border-neutral-100">
                     <th class="px-4 py-3 font-medium">Order</th>
                     <th class="px-4 py-3 font-medium">Customer</th>
-                    <th class="px-4 py-3 font-medium">Type</th>
+                    <th class="px-4 py-3 font-medium">Deliver to / type</th>
                     <th class="px-4 py-3 font-medium">Items</th>
                     <th class="px-4 py-3 text-right font-medium">Total</th>
                     <th class="px-4 py-3 font-medium">Cashier</th>
@@ -52,7 +52,7 @@
                     <tr class="hover:bg-neutral-50">
                         <td class="px-4 py-3"><a href="{{ route('admin.orders.show', $order) }}" class="font-semibold underline underline-offset-2">#{{ $order->number }}</a></td>
                         <td class="px-4 py-3">{{ $order->customer_name }}</td>
-                        <td class="px-4 py-3 text-neutral-600">{{ $order->type->label() }}@if ($order->diningTable) · {{ $order->diningTable->name }}@endif</td>
+                        <td class="px-4 py-3 text-neutral-600">{{ $order->location ?? $order->type->label() }}</td>
                         <td class="px-4 py-3">{{ (int) $order->items_count }}</td>
                         <td class="px-4 py-3 text-right font-semibold">{{ $currency }}{{ number_format($order->total, 2) }}</td>
                         <td class="px-4 py-3 text-neutral-600">{{ $order->user?->name ?? '—' }}</td>

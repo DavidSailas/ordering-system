@@ -12,14 +12,14 @@
     <div>
         <label for="role" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-neutral-600">Role</label>
         <select id="role" name="role" required class="w-full rounded-xl border-0 bg-white px-4 py-2.5 text-sm shadow-sm ring-1 ring-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-400">
-            @foreach (UserRole::cases() as $case)
+            @foreach ($roles as $case)
                 <option value="{{ $case->value }}" @selected(old('role', $member->role?->value) === $case->value)>{{ $case->label() }}</option>
             @endforeach
         </select>
         @error('role')
             <p class="mt-1.5 text-xs text-rose-600">{{ $message }}</p>
         @enderror
-        <p class="mt-1.5 text-xs text-neutral-500">Cashiers use the POS screen. Admins also manage the menu, staff and reports.</p>
+        <p class="mt-1.5 text-xs text-neutral-500">Cashiers take payments and manage incoming orders. Runners deliver orders to the student's room.@if (in_array(UserRole::Owner, $roles, true)) The owner is the head of this canteen: menu, staff, settings and reports.@endif</p>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">

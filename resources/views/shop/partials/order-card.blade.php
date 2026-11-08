@@ -8,6 +8,8 @@
       <div class="cb-order-step {{ $stage >= $stepIndex ? 'is-done' : '' }}"><span class="cb-order-dot">{{ $stage >= $stepIndex ? '✓' : $stepIndex + 1 }}</span><small>{{ $step }}</small></div>
     @endforeach
   </div>
+  @if($order->relationLoaded('canteen') && $order->canteen)<p class="muted" style="margin:6px 0 0">{{ $order->canteen->name }}</p>@endif
+  @if($order->location)<p class="muted" style="margin:6px 0 0">Deliver to: <b>{{ $order->location }}</b></p>@endif
   <div class="cb-order-items">
     @foreach($order->items as $item)
       <div><span><b>{{ $item->quantity }}×</b> {{ $item->name }}</span><strong>₱{{ number_format($item->price * $item->quantity, 2) }}</strong></div>

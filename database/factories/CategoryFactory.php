@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Category;
+use App\Models\Canteen;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -24,6 +25,7 @@ class CategoryFactory extends Factory
             'name' => Str::title($name),
             'slug' => Str::slug($name),
             'sort_order' => fake()->numberBetween(0, 20),
+            'canteen_id' => fn () => Canteen::default()->id,
         ];
     }
 }

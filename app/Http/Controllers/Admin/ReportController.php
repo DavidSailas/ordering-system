@@ -40,6 +40,7 @@ class ReportController extends Controller
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->leftJoin('menu_items', 'menu_items.id', '=', 'order_items.menu_item_id')
             ->leftJoin('categories', 'categories.id', '=', 'menu_items.category_id')
+            ->where('orders.canteen_id', \App\Support\CurrentCanteen::id())
             ->where('orders.status', '!=', OrderStatus::Canceled->value)
             ->whereBetween('orders.created_at', [$from, $to])
             ->selectRaw('order_items.name as dish, categories.name as category, sum(order_items.quantity) as quantity, sum(order_items.price * order_items.quantity) as revenue')

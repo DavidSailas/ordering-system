@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class OrderController extends Controller
@@ -19,7 +20,7 @@ class OrderController extends Controller
         $search = trim((string) $request->query('q', ''));
 
         $orders = Order::query()
-            ->with(['diningTable', 'user'])
+            ->with(['user'])
             ->withSum('items as items_count', 'quantity')
             ->when($status, fn (Builder $query) => $query->where('status', $status->value))
             ->when($type, fn (Builder $query) => $query->where('type', $type->value))
@@ -28,7 +29,7 @@ class OrderController extends Controller
 
                 $query->where(function (Builder $query) use ($search, $reference): void {
                     $query->where('customer_name', 'like', '%'.$search.'%')
-                        ->when(ctype_digit($reference), fn (Builder $query) => $query->orWhere('id', (int) $reference));
+                        ->when(ctype_digit($reference), fn (Builder $query) => $query->orWhere('canteen_number', (int) $reference));
                 });
             })
             ->latest()
@@ -45,8 +46,10 @@ class OrderController extends Controller
 
     public function show(Order $order): View
     {
+        Gate::authorize('view', $order);
+
         return view('Admin.orders.show', [
-            'order' => $order->load(['items', 'diningTable', 'user']),
+            'order' => $order->load(['items', 'user']),
         ]);
     }
 }

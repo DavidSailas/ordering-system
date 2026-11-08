@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Support\ShopCart;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,8 @@ class LoginController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        ShopCart::mergeGuestCartInto($request, $request->user());
 
         return redirect()->intended(route($request->user()->role->homeRoute()));
     }

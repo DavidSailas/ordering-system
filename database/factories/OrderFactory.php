@@ -4,10 +4,10 @@ namespace Database\Factories;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
-use App\Models\DiningTable;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Canteen;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,12 +24,13 @@ class OrderFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'dining_table_id' => DiningTable::factory(),
+            'dining_table_id' => null,
             'customer_name' => fake()->name(),
             'type' => OrderType::DineIn,
             'status' => OrderStatus::InProgress,
             'notes' => null,
             'total' => 0,
+            'canteen_id' => fn () => Canteen::default()->id,
         ];
     }
 

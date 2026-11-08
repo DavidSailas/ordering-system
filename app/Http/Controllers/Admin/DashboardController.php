@@ -43,6 +43,7 @@ class DashboardController extends Controller
 
         $topDishes = DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.canteen_id', \App\Support\CurrentCanteen::id())
             ->where('orders.status', '!=', OrderStatus::Canceled->value)
             ->whereBetween('orders.created_at', [$weekStart, now()->endOfDay()])
             ->selectRaw('order_items.name as name, sum(order_items.quantity) as quantity')
@@ -59,12 +60,12 @@ class DashboardController extends Controller
             'activeOrders' => Order::query()->whereIn('status', OrderStatus::active())->count(),
             'availableDishes' => MenuItem::query()->available()->count(),
             'totalDishes' => MenuItem::query()->count(),
-            'cashierCount' => User::query()->where('role', UserRole::Cashier->value)->count(),
+            'cashierCount' => User::query()->where('role', UserRole::Cashier->value)->where('canteen_id', \App\Support\CurrentCanteen::id())->count(),
             'salesByDay' => $salesByDay,
             'maxDailySales' => max(1.0, (float) $salesByDay->max('total')),
             'topDishes' => $topDishes,
             'recentOrders' => Order::query()
-                ->with(['diningTable', 'user'])
+                ->with(['user'])
                 ->withSum('items as items_count', 'quantity')
                 ->latest()
                 ->limit(6)

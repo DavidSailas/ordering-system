@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Enums\OrderStatus;
 use App\Enums\UserRole;
-use App\Models\DiningTable;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -17,8 +16,6 @@ class OrderSeeder extends Seeder
     public function run(): void
     {
         $user = User::query()->where('role', UserRole::Cashier->value)->first();
-        $tables = DiningTable::query()->orderBy('id')->limit(4)->get();
-
         $statuses = [
             OrderStatus::ReadyToServe,
             OrderStatus::InProgress,
@@ -26,13 +23,15 @@ class OrderSeeder extends Seeder
             OrderStatus::Completed,
         ];
 
-        foreach ($tables as $index => $table) {
+        foreach ($statuses as $index => $status) {
             Order::factory()
-                ->status($statuses[$index])
+                ->status($status)
                 ->withItems()
                 ->create([
                     'user_id' => $user?->id,
-                    'dining_table_id' => $table->id,
+                    'phone' => '0917123456'.$index,
+                    'building' => 'Main Building',
+                    'room' => (string) (101 + $index),
                 ]);
         }
 

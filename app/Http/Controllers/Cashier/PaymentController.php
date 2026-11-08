@@ -5,11 +5,12 @@ use App\Models\Order;
 use App\Enums\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 class PaymentController extends Controller {
- public function show(Order $order) { return view('Cashier.payment',['order'=>$order->load('items')]); }
- public function receipt(Request $request, Order $order) { return view('Cashier.receipt',['order'=>$order->load('items'),'autoprint'=>$request->boolean('print')]); }
+ public function show(Order $order) { Gate::authorize('view',$order); return view('Cashier.payment',['order'=>$order->load('items')]); }
+ public function receipt(Request $request, Order $order) { Gate::authorize('view',$order); return view('Cashier.receipt',['order'=>$order->load('items'),'autoprint'=>$request->boolean('print')]); }
  public function store(Request $request, Order $order) {
   $data=$request->validate(['payment_method'=>['required',Rule::in(['cash','gcash','maya'])], 'cash_received'=>['nullable','numeric','decimal:0,2','min:0','max:99999999.99'], 'payment_reference'=>['nullable','string','max:100'], 'discount'=>['nullable','numeric','decimal:0,2','min:0','max:99999999.99']]);
   DB::transaction(function() use($order,$request,$data) {
@@ -26,7 +27,7 @@ class PaymentController extends Controller {
   return redirect()->route('orders.payment',$order)->with('success','Payment recorded.');
  }
  public function refund(Request $request,Order $order) {
-  abort_unless($request->user()->isAdmin(),403);
+  abort_unless($request->user()->isManager(),403);
   $data=$request->validate(['reason'=>['required','string','min:5','max:500']]);
   DB::transaction(function()use($order,$request,$data){$locked=Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
    if(!$locked->paid_at || $locked->refunded_at) throw ValidationException::withMessages(['refund'=>'Order is unpaid or already refunded.']);

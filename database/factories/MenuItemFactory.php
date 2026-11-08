@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Models\Canteen;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -26,6 +27,7 @@ class MenuItemFactory extends Factory
             'price' => fake()->randomFloat(2, 3, 30),
             'image_path' => null,
             'is_available' => true,
+            'canteen_id' => fn () => Canteen::default()->id,
         ];
     }
 

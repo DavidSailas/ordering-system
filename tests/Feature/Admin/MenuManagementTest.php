@@ -41,7 +41,7 @@ test('a dish can be added with a photo', function () {
         'price' => '14.50',
         'description' => 'Sizzling pork',
         'is_available' => '1',
-        'image' => UploadedFile::fake()->image('sisig.jpg'),
+        'image' => UploadedFile::fake()->image('sisig.jpg', 800, 600),
     ])->assertRedirect(route('admin.foods.index'));
 
     $item = MenuItem::query()->where('name', 'Sisig')->sole();
@@ -83,7 +83,7 @@ test('a dish can be edited and its photo replaced', function () {
         'category_id' => $item->category_id,
         'price' => '9.00',
         'is_available' => '0',
-        'image' => UploadedFile::fake()->image('new.png'),
+        'image' => UploadedFile::fake()->image('new.png', 800, 600),
     ])->assertRedirect(route('admin.foods.index'));
 
     $item->refresh();

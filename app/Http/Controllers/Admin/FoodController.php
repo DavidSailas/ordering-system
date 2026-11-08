@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\MenuItemRequest;
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Support\DishImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -51,7 +52,7 @@ class FoodController extends Controller
         $data['is_available'] = $request->boolean('is_available');
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('menu', 'public');
+            $data['image_path'] = DishImage::store($request->file('image'));
         }
 
         $item = MenuItem::create($data);
@@ -76,7 +77,7 @@ class FoodController extends Controller
 
         if ($request->hasFile('image')) {
             $this->deleteImage($food);
-            $data['image_path'] = $request->file('image')->store('menu', 'public');
+            $data['image_path'] = DishImage::store($request->file('image'));
         } elseif ($request->boolean('remove_image')) {
             $this->deleteImage($food);
             $data['image_path'] = null;

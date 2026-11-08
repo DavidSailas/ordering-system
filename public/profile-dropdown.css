@@ -5,7 +5,7 @@
 .profile-dropdown summary::-webkit-details-marker{display:none}
 .profile-dropdown summary::marker{content:""}
 .profile-dropdown summary:hover{background:#fafafa;border-color:#d1d5db}
-.profile-dropdown .profile-avatar{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;background:#fff0e9;color:#df542e;font-weight:700}
+.profile-dropdown .profile-avatar{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;background:#fff4e5;color:#df542e;font-weight:700}
 .profile-dropdown .profile-trigger-name{font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .profile-dropdown .profile-chevron{font-size:18px;color:#64748b;transition:transform .15s}
 .profile-dropdown[open] .profile-chevron{transform:rotate(180deg)}
@@ -16,4 +16,4 @@
 .profile-dropdown .profile-identity-text small{color:#64748b;font-size:12px}
 .profile-dropdown .profile-menu form{margin:8px 0 0}
 .profile-dropdown .profile-menu .profile-logout{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:9px;padding:10px 12px;color:#d94d2b;font-size:14px;font-weight:600;cursor:pointer}
-.profile-dropdown .profile-menu .profile-logout:hover{background:#fff1eb}
+.profile-dropdown .profile-menu .profile-logout:hover{background:#fff4e5}

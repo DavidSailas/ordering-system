@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCanteen;
 use Database\Factories\MenuItemFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 class MenuItem extends Model
 {
     /** @use HasFactory<MenuItemFactory> */
-    use HasFactory;
+    use BelongsToCanteen, HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,7 @@ class MenuItem extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'canteen_id',
         'category_id',
         'name',
         'description',
@@ -66,7 +68,7 @@ class MenuItem extends Model
     protected function imageUrl(): Attribute
     {
         return Attribute::get(
-            fn (): ?string => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
+            fn (): ?string => $this->image_path ? asset('storage/'.$this->image_path) : null,
         );
     }
 }

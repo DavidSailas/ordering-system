@@ -32,7 +32,7 @@ class CategoryRequest extends FormRequest
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('categories', 'name')->ignore($category),
+                Rule::unique('categories', 'name')->where('canteen_id', \App\Support\CurrentCanteen::id())->ignore($category),
                 function (string $attribute, mixed $value, Closure $fail) use ($category): void {
                     $slugTaken = Category::query()
                         ->where('slug', Str::slug($value))

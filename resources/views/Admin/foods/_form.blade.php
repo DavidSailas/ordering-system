@@ -49,15 +49,11 @@
     <aside class="space-y-4 self-start rounded-3xl bg-violet-200 p-4">
         <h2 class="text-lg font-semibold">Dish photo</h2>
 
-        @if ($item->image_url)
-            <img src="{{ $item->image_url }}" alt="{{ $item->name }}" class="aspect-square w-full rounded-2xl object-cover">
-        @else
-            <div class="grid aspect-square w-full place-items-center rounded-2xl bg-white/60 text-sm text-neutral-500">No photo yet</div>
-        @endif
+        <x-dish-image :item="$item" />
 
         <div>
             <input id="image" type="file" name="image" accept="image/png,image/jpeg,image/webp" class="w-full text-sm file:mr-3 file:rounded-full file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-700">
-            <p class="mt-1.5 text-xs text-neutral-600">JPG, PNG or WebP, up to 4 MB.</p>
+            <p class="mt-1.5 text-xs text-neutral-600">JPG, PNG or WebP, up to 4 MB, at least 400 × 300 px. Photos are cropped to 4:3 so every dish looks the same.</p>
             @error('image')
                 <p class="mt-1.5 text-xs text-rose-600">{{ $message }}</p>
             @enderror

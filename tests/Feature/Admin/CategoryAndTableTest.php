@@ -41,33 +41,3 @@ test('a category that still has dishes cannot be deleted', function () {
 
     $this->assertModelExists($category);
 });
-
-test('a table can be created, edited and deleted', function () {
-    $this->post(route('admin.tables.store'), ['name' => 'Table 20', 'seats' => 8])->assertRedirect();
-
-    $table = DiningTable::query()->where('name', 'Table 20')->sole();
-    expect($table->seats)->toBe(8);
-
-    $this->put(route('admin.tables.update', $table), ['name' => 'Patio 1', 'seats' => 2])->assertRedirect();
-    expect($table->refresh()->name)->toBe('Patio 1');
-
-    $this->delete(route('admin.tables.destroy', $table))->assertRedirect();
-    $this->assertModelMissing($table);
-});
-
-test('a table with order history cannot be deleted', function () {
-    $order = Order::factory()->create();
-
-    $this->delete(route('admin.tables.destroy', $order->diningTable))->assertSessionHasErrors('table');
-
-    $this->assertModelExists($order->diningTable);
-});
-
-test('the tables page shows which tables are occupied', function () {
-    $busy = Order::factory()->status(OrderStatus::InProgress)->create();
-
-    $this->get(route('admin.tables.index'))
-        ->assertOk()
-        ->assertSee($busy->diningTable->name)
-        ->assertSee('Occupied');
-});

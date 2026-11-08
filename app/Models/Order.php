@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\OrderType;
 use Carbon\CarbonInterface;
+use App\Models\Concerns\BelongsToCanteen;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     /** @use HasFactory<OrderFactory> */
-    use HasFactory;
+    use BelongsToCanteen, HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -27,7 +28,12 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'dining_table_id',
+        'canteen_id',
+        'canteen_number',
         'customer_name',
+        'phone',
+        'building',
+        'room',
         'type',
         'status',
         'notes',
@@ -112,6 +118,33 @@ class Order extends Model
     public function changeDue(): float
     {
         return max(0.0, (float) $this->cash_received - $this->amountCharged());
+    }
+
+    protected static function booted(): void
+    {
+        // Each canteen numbers its own orders: #0001, #0002, ...
+        static::creating(function (Order $order): void {
+            if ($order->canteen_id && ! $order->canteen_number) {
+                $order->canteen_number = ((int) static::withoutGlobalScopes()->where('canteen_id', $order->canteen_id)->max('canteen_number')) + 1;
+            }
+        });
+    }
+
+    /**
+     * Where the customer wants the order brought, e.g. "Main Building · Room 204".
+     *
+     * @return Attribute<string|null, never>
+     */
+    protected function location(): Attribute
+    {
+        return Attribute::get(function (): ?string {
+            $parts = array_filter([
+                $this->building,
+                $this->room ? 'Room '.$this->room : null,
+            ]);
+
+            return $parts ? implode(' · ', $parts) : null;
+        });
     }
 
     /**

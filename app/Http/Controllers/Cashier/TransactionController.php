@@ -8,7 +8,7 @@ class TransactionController extends Controller {
   $date=$request->validate(['date'=>['nullable','date_format:Y-m-d'],'order'=>['nullable','string','max:30']]);
   $day=$date['date']??now()->toDateString();
   $orders=Order::query()->with('items')->when(blank($date['order']??null),fn($q)=>$q->whereDate('created_at',$day))
-   ->when(filled($date['order']??null),fn($q)=>$q->where('id',(int)$date['order']))->latest()->paginate(30)->withQueryString();
+   ->when(filled($date['order']??null),fn($q)=>$q->where('canteen_number',(int)$date['order']))->latest()->paginate(30)->withQueryString();
   $paid=Order::query()->whereDate('paid_at',$day)->whereNull('refunded_at');
   $summary=['transactions'=>(clone $paid)->count(),'net'=>(clone $paid)->sum('amount_paid'),
    'cash'=>(clone $paid)->where('payment_method','cash')->sum('amount_paid'),
@@ -22,7 +22,7 @@ class TransactionController extends Controller {
   $day=$filters['date']??now()->toDateString();
   $orders=Order::query()->with('items')->whereNotNull('paid_at')
    ->when(blank($filters['order']??null),fn($q)=>$q->whereDate('paid_at',$day))
-   ->when(filled($filters['order']??null),fn($q)=>$q->where('id',(int)$filters['order']))
+   ->when(filled($filters['order']??null),fn($q)=>$q->where('canteen_number',(int)$filters['order']))
    ->latest('paid_at')->paginate(30)->withQueryString();
   return view('Cashier.payment-records',compact('orders','day'));
  }

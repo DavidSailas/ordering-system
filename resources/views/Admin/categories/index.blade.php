@@ -36,7 +36,7 @@
                     </button>
                 </form>
 
-                <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" onsubmit="return confirm('Delete the {{ addslashes($category->name) }} category?')">
+                <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" data-confirm="Delete the {{ $category->name }} category?" data-confirm-title="Delete this item?" data-confirm-ok="Yes, delete">
                     @csrf
                     @method('DELETE')
                     <button type="submit" aria-label="Delete {{ $category->name }}" class="grid size-9 place-items-center rounded-full bg-neutral-100 hover:bg-rose-100 hover:text-rose-600">

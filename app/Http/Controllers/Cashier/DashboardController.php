@@ -3,74 +3,58 @@
 namespace App\Http\Controllers\Cashier;
 
 use App\Enums\OrderStatus;
-use App\Enums\OrderType;
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\DiningTable;
-use App\Models\MenuItem;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+/**
+ * The cashier's home page: a live board of incoming orders
+ * (Preparing → Ready → Done today).
+ */
 class DashboardController extends Controller
 {
-    public function incoming(Request $request): View
-    {
-        return $this->index($request)->with('incomingMode', true);
-    }
-
     public function index(Request $request): View
     {
-        $type = OrderType::tryFrom((string) $request->query('type'));
         $search = trim((string) $request->query('q', ''));
 
-        $categories = Category::query()
-            ->withCount(['menuItems' => fn (Builder $query) => $query->available()])
-            ->orderBy('sort_order')
-            ->get();
-
-        $activeCategory = $categories->firstWhere('slug', $request->query('category'));
-
-        $menuItems = MenuItem::query()
-            ->available()
-            ->with('category')
-            ->when($activeCategory, fn (Builder $query) => $query->whereBelongsTo($activeCategory))
-            ->when($search !== '', fn (Builder $query) => $query->where('name', 'like', '%'.$search.'%'))
-            ->orderBy('name')
-            ->get();
-
-        $orders = Order::query()
-            ->with('diningTable')
+        $base = fn (): Builder => Order::query()
+            ->with('items')
             ->withSum('items as items_count', 'quantity')
-            ->when($type, fn (Builder $query) => $query->where('type', $type))
-            ->latest()
-            ->limit(12)
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $number = (int) preg_replace('/\D/', '', $search);
+
+                $query->where(function (Builder $query) use ($search, $number): void {
+                    $query->where('customer_name', 'like', '%'.$search.'%')
+                        ->orWhere('building', 'like', '%'.$search.'%')
+                        ->orWhere('room', 'like', '%'.$search.'%')
+                        ->orWhere('phone', 'like', '%'.$search.'%');
+
+                    if ($number > 0) {
+                        $query->orWhere('canteen_number', $number);
+                    }
+                });
+            });
+
+        $preparing = $base()->where('status', OrderStatus::InProgress->value)->oldest()->get();
+        $ready = $base()->where('status', OrderStatus::ReadyToServe->value)->oldest()->get();
+        $finished = $base()
+            ->whereIn('status', [OrderStatus::Completed->value, OrderStatus::Canceled->value])
+            ->where('updated_at', '>=', now()->startOfDay())
+            ->latest('updated_at')
+            ->limit(20)
             ->get();
 
-        $orderCounts = Order::query()
-            ->toBase()
-            ->selectRaw('type, count(*) as total')
-            ->groupBy('type')
-            ->pluck('total', 'type');
-
-        $occupiedTableIds = Order::query()
-            ->whereNotNull('dining_table_id')
-            ->whereIn('status', OrderStatus::active())
-            ->pluck('dining_table_id');
+        $active = $preparing->concat($ready);
 
         return view('Cashier.dashboard', [
-            'incomingMode' => false,
-            'type' => $type,
             'search' => $search,
-            'categories' => $categories,
-            'activeCategory' => $activeCategory,
-            'allItemsCount' => $categories->sum('menu_items_count'),
-            'menuItems' => $menuItems,
-            'orders' => $orders,
-            'orderCounts' => $orderCounts,
-            'tables' => DiningTable::query()->orderBy('id')->get(),
-            'occupiedTableIds' => $occupiedTableIds,
+            'preparing' => $preparing,
+            'ready' => $ready,
+            'finished' => $finished,
+            'unpaidCount' => $active->reject(fn (Order $order) => $order->isPaid())->count(),
+            'newestId' => (int) $active->max('id'),
         ]);
     }
 }

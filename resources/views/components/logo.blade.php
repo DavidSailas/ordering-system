@@ -1,5 +1,12 @@
-<svg {{ $attributes->merge(['class' => 'size-8', 'viewBox' => '0 0 32 32', 'xmlns' => 'http://www.w3.org/2000/svg', 'aria-hidden' => 'true']) }}>
-    <rect width="32" height="32" rx="16" fill="#262626" />
-    <path d="M9 9.5v13l8-6.5-8-6.5Z" fill="#d9f99d" />
-    <path d="M15.5 9.5v13l8-6.5-8-6.5Z" fill="#c4b5fd" />
-</svg>
+@props(['size' => 40, 'canteen' => null])
+
+{{-- A canteen's logo: the uploaded image, or the built-in burger logo (public/logo.png). --}}
+@php($logo = $canteen ? $canteen->logo_path : config('restaurant.logo_path'))
+@php($logoName = $canteen->name ?? config('restaurant.name'))
+<span {{ $attributes->class(['brand-logo']) }} style="--logo-size: {{ (int) $size }}px{{ $canteen ? '; --brand: '.$canteen->accent : '' }}">
+    @if ($logo)
+        <img src="{{ asset('storage/'.$logo) }}" alt="{{ $logoName }} logo">
+    @else
+        <img src="{{ asset('logo.png') }}" alt="{{ $logoName }} logo" class="brand-logo-default">
+    @endif
+</span>

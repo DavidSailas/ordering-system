@@ -37,7 +37,7 @@ test('the report totals revenue, dishes and cashiers for a date range', function
 
     $this->get(route('admin.reports.index', ['from' => now()->toDateString(), 'to' => now()->toDateString()]))
         ->assertOk()
-        ->assertSee('$30.00')
+        ->assertSee('₱30.00')
         ->assertSee('BBQ Chicken')
         ->assertSee('3 sold')
         ->assertDontSee('50 sold')
@@ -50,7 +50,7 @@ test('orders outside the chosen dates are left out of the report', function () {
 
     $this->get(route('admin.reports.index', ['from' => now()->subDays(2)->toDateString(), 'to' => now()->toDateString()]))
         ->assertOk()
-        ->assertDontSee('$77.00');
+        ->assertDontSee('₱77.00');
 });
 
 test('the report validates its date range', function () {

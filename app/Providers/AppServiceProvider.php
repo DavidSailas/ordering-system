@@ -19,6 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Per-canteen settings are applied by App\Http\Middleware\ApplyCanteenContext.
     }
 }

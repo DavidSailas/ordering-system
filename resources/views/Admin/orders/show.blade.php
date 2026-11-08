@@ -57,8 +57,11 @@
                 <div class="flex justify-between gap-3"><dt class="text-neutral-500">Status</dt><dd><x-admin.status-badge :status="$order->status" /></dd></div>
                 <div class="flex justify-between gap-3"><dt class="text-neutral-500">Customer</dt><dd class="font-medium">{{ $order->customer_name }}</dd></div>
                 <div class="flex justify-between gap-3"><dt class="text-neutral-500">Type</dt><dd class="font-medium">{{ $order->type->label() }}</dd></div>
-                @if ($order->diningTable)
-                    <div class="flex justify-between gap-3"><dt class="text-neutral-500">Table</dt><dd class="font-medium">{{ $order->diningTable->name }}</dd></div>
+                @if ($order->location)
+                    <div class="flex justify-between gap-3"><dt class="text-neutral-500">Deliver to</dt><dd class="font-medium text-right">{{ $order->location }}</dd></div>
+                @endif
+                @if ($order->phone)
+                    <div class="flex justify-between gap-3"><dt class="text-neutral-500">Phone</dt><dd class="font-medium">{{ $order->phone }}</dd></div>
                 @endif
                 <div class="flex justify-between gap-3"><dt class="text-neutral-500">Cashier</dt><dd class="font-medium">{{ $order->user?->name ?? '—' }}</dd></div>
             </dl>
@@ -74,7 +77,7 @@
                         </form>
                     @endif
 
-                    <form method="POST" action="{{ route('orders.status', $order) }}" onsubmit="return confirm('Cancel order #{{ $order->number }}?')">
+                    <form method="POST" action="{{ route('orders.status', $order) }}" data-confirm="Cancel order #{{ $order->number }}?" data-confirm-title="Cancel order?" data-confirm-ok="Yes, cancel order">
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="status" value="{{ OrderStatus::Canceled->value }}">

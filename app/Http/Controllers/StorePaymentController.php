@@ -34,6 +34,7 @@ class StorePaymentController extends Controller
     public function show(Request $request, Order $order, string $method)
     {
         $this->authorizeOrder($request, $order);
+        $order->canteen?->applyToConfig();
         if ($reason = $this->blockedReason($order, $method)) {
             return redirect()->route('shop.orders')->with('success', $reason);
         }
@@ -49,6 +50,7 @@ class StorePaymentController extends Controller
     public function store(Request $request, Order $order, string $method): RedirectResponse
     {
         $this->authorizeOrder($request, $order);
+        $order->canteen?->applyToConfig();
         if ($reason = $this->blockedReason($order, $method)) {
             return redirect()->route('shop.orders')->with('success', $reason);
         }

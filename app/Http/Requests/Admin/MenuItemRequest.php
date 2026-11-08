@@ -23,7 +23,7 @@ class MenuItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => ['required', Rule::exists('categories', 'id')],
+            'category_id' => ['required', Rule::exists('categories', 'id')->where('canteen_id', \App\Support\CurrentCanteen::id())],
             'name' => [
                 'required',
                 'string',
@@ -34,7 +34,7 @@ class MenuItemRequest extends FormRequest
             ],
             'description' => ['nullable', 'string', 'max:1000'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999.99'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096', 'dimensions:min_width=400,min_height=300'],
             'remove_image' => ['nullable', 'boolean'],
             'is_available' => ['nullable', 'boolean'],
         ];
@@ -48,6 +48,7 @@ class MenuItemRequest extends FormRequest
         return [
             'name.unique' => 'This category already has a dish with that name.',
             'image.max' => 'The photo may not be larger than 4 MB.',
+            'image.dimensions' => 'The photo is too small. Use at least 400 × 300 pixels so every dish looks sharp.',
         ];
     }
 }

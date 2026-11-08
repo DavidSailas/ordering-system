@@ -59,7 +59,7 @@ class MockDataSeeder extends Seeder
                 'slug' => 'cecilian-eatery',
                 'tagline' => 'Rice meals, snacks, drinks and everyday essentials.',
                 'accent' => '#d62d1a',
-                'address' => '2nd Floor, Science Hall',
+                'address' => '5th Floor, Annex Building',
                 'phone' => '0935 555 0147',
                 'gcash' => ['0935 555 0147', 'Cecilian Eatery'],
                 'maya' => ['0961 222 8830', 'Cecilian Eatery'],
@@ -77,7 +77,7 @@ class MockDataSeeder extends Seeder
     ];
 
     /** @var list<string> */
-    private array $buildings = ['Main Building', 'Science Hall', 'Library', 'Engineering Building', 'Administration Building'];
+    private array $buildings = ['Main Building', 'Annex Building'];
 
     public function run(): void
     {

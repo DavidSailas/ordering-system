@@ -352,3 +352,57 @@ dialog.ui-modal::backdrop { background: rgba(20, 24, 40, .5); backdrop-filter: b
 .picker-cta { margin-top: 16px; padding: 12px 16px; font-size: 15px; }
 .picker-card:focus-within { box-shadow: 0 0 0 4px var(--brand-100), var(--shadow); }
 @media (max-width: 520px) { .picker-staff { padding: 7px 11px; } .picker { padding-top: 24px; } }
+
+/* ---------- dish photo adjuster (admin menu form) ---------- */
+.pa { display: grid; gap: 12px; }
+.pa-hidden-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.pa-drop { display: grid; place-items: center; gap: 6px; width: 100%; aspect-ratio: 4 / 3; padding: 16px; text-align: center; cursor: pointer;
+  border: 2px dashed var(--brand-200); border-radius: var(--radius); background: rgba(255,255,255,.7); color: var(--ink-2);
+  transition: border-color .15s, background .15s; }
+.pa-drop:hover, .pa-drop:focus-visible, .pa-drop.is-over { border-color: var(--brand); background: #fff; outline: none; }
+.pa-drop strong { display: block; font-size: 14px; color: var(--ink); }
+.pa-drop span { font-size: 12px; color: var(--muted); }
+.pa-drop svg { width: 28px; height: 28px; color: var(--brand); }
+
+.pa-current { position: relative; }
+.pa-current[hidden] { display: none; }
+.pa-current.is-removed .dish-img { opacity: .35; filter: grayscale(1); }
+.pa-current .pa-replace { margin-top: 10px; }
+
+.pa-editor { display: none; gap: 12px; }
+.pa.has-photo .pa-editor { display: grid; }
+.pa.has-photo .pa-drop { display: none; }
+
+.pa-stage { position: relative; border-radius: var(--radius); overflow: hidden; background: #fff; box-shadow: 0 0 0 1px var(--line); line-height: 0; }
+.pa-stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; cursor: grab; touch-action: none; user-select: none; }
+.pa-stage.is-dragging canvas { cursor: grabbing; }
+.pa-stage canvas:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
+/* rule-of-thirds guide, only while dragging */
+.pa-stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .15s;
+  background:
+    linear-gradient(to right, transparent 33.2%, rgba(255,255,255,.7) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.7) 66.6%, transparent 66.8%),
+    linear-gradient(to bottom, transparent 33.2%, rgba(255,255,255,.7) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.7) 66.6%, transparent 66.8%); }
+.pa-stage.is-dragging::after { opacity: 1; }
+.pa-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); padding: 4px 10px; border-radius: 999px; font-size: 11px; line-height: 1.4;
+  color: #fff; background: rgba(20,24,40,.62); pointer-events: none; transition: opacity .2s; white-space: nowrap; }
+.pa-stage.is-dragging .pa-hint { opacity: 0; }
+
+.pa-zoom { display: flex; align-items: center; gap: 8px; }
+.pa-zoom input[type=range] { flex: 1; min-width: 0; accent-color: var(--brand); }
+.pa-zoom output { min-width: 42px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.pa-icon-btn { display: inline-grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 999px; background: #fff; color: var(--ink); cursor: pointer; box-shadow: 0 0 0 1px var(--line); font-size: 18px; line-height: 1; }
+.pa-icon-btn:hover { background: var(--brand-50); }
+.pa-icon-btn:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+
+.pa-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pa-btn { padding: 8px 14px; border: 0; border-radius: 999px; background: #fff; color: var(--ink); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; box-shadow: 0 0 0 1px var(--line); }
+.pa-btn:hover { background: var(--brand-50); }
+.pa-btn:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.pa-btn--quiet { background: transparent; box-shadow: none; color: var(--muted); }
+
+.pa-note { margin: 0; padding: 8px 10px; border-radius: var(--radius-sm); font-size: 12px; background: var(--info-bg); color: var(--info); }
+.pa-note.is-warn { background: var(--warn-bg); color: var(--warn); }
+.pa-note[hidden] { display: none; }
+.pa-help { margin: 0; font-size: 12px; color: var(--ink-2); }
+.pa-drop[hidden] { display: none; }

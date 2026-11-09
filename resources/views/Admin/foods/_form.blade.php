@@ -49,11 +49,54 @@
     <aside class="space-y-4 self-start rounded-3xl bg-violet-200 p-4">
         <h2 class="text-lg font-semibold">Dish photo</h2>
 
-        <x-dish-image :item="$item" />
+        <div class="pa" data-photo-adjuster>
+            {{-- The real file input. Visually hidden; the adjuster fills it with the framed photo. --}}
+            <input id="image" type="file" name="image" accept="image/png,image/jpeg,image/webp" class="pa-hidden-input" data-pa-input>
 
-        <div>
-            <input id="image" type="file" name="image" accept="image/png,image/jpeg,image/webp" class="w-full text-sm file:mr-3 file:rounded-full file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-700">
-            <p class="mt-1.5 text-xs text-neutral-600">JPG, PNG or WebP, up to 4 MB, at least 400 × 300 px. Photos are cropped to 4:3 so every dish looks the same.</p>
+            {{-- Current photo (edit screen) --}}
+            @if ($item->image_url)
+                <div class="pa-current" data-pa-current>
+                    <x-dish-image :item="$item" />
+                    <button type="button" class="pa-btn pa-replace" data-pa-change>Replace photo</button>
+                </div>
+            @endif
+
+            {{-- Empty state / drop zone --}}
+            <label for="image" class="pa-drop" tabindex="0" data-pa-drop @if ($item->image_url) hidden @endif
+                   onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                <div>
+                    <strong>Click to upload or drop a photo here</strong>
+                    <span>JPG, PNG or WebP · you can crop it next</span>
+                </div>
+            </label>
+
+            {{-- Adjuster (appears after a photo is chosen) --}}
+            <div class="pa-editor">
+                <div class="pa-stage" data-pa-stage>
+                    <canvas tabindex="0" data-pa-canvas role="img"
+                            aria-label="Photo preview. Drag to reposition, use arrow keys to move and plus or minus to zoom."></canvas>
+                    <span class="pa-hint" aria-hidden="true">Drag to reposition</span>
+                </div>
+
+                <div class="pa-zoom">
+                    <button type="button" class="pa-icon-btn" data-pa-zoom-out aria-label="Zoom out">−</button>
+                    <input type="range" min="1" max="4" step="0.01" value="1" data-pa-zoom aria-label="Zoom">
+                    <button type="button" class="pa-icon-btn" data-pa-zoom-in aria-label="Zoom in">+</button>
+                    <output data-pa-zoom-label>100%</output>
+                </div>
+
+                <div class="pa-actions">
+                    <button type="button" class="pa-btn" data-pa-rotate>Rotate</button>
+                    <button type="button" class="pa-btn" data-pa-reset>Reset</button>
+                    <button type="button" class="pa-btn" data-pa-change>Change photo</button>
+                    <button type="button" class="pa-btn pa-btn--quiet" data-pa-discard>Discard</button>
+                </div>
+            </div>
+
+            <p class="pa-note" data-pa-note hidden></p>
+            <p class="pa-help">Shown in a 4:3 frame on the menu. What you see here is exactly what customers will see.</p>
+
             @error('image')
                 <p class="mt-1.5 text-xs text-rose-600">{{ $message }}</p>
             @enderror
@@ -74,3 +117,5 @@
         </div>
     </aside>
 </form>
+
+<script src="{{ asset('photo-adjuster.js') }}?v={{ @filemtime(public_path('photo-adjuster.js')) }}" defer></script>

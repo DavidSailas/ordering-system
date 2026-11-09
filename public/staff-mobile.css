@@ -1,0 +1,173 @@
+/* ==========================================================================
+   Cecilian Bites — phone & tablet layout for Admin / Owner / Cashier / Runner.
+   Loaded after ui.css. Desktop is untouched (everything is inside media queries,
+   apart from hiding the two mobile-only elements).
+   ========================================================================== */
+
+.ui-tabbar, .ui-topbar-brand { display: none; }
+
+@media (max-width: 900px) {
+  :root { --tabbar-h: 62px; --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px); }
+
+  html { -webkit-text-size-adjust: 100%; }
+  body.ui-body { padding-bottom: calc(var(--tabbar-h) + var(--safe-b) + 8px); }
+  .ui-main { min-width: 0; max-width: 100vw; overflow-x: clip; }
+
+  /* ---- the side bar becomes a bottom tab bar ---- */
+  .ui-sidebar { display: none; }
+  body.ui-body.has-no-tabs { padding-bottom: calc(var(--safe-b) + 8px); }
+  .ui-tabbar[hidden] { display: none; }
+  .ui-body input[type=checkbox], .ui-body input[type=radio] { accent-color: var(--brand); }
+
+  .ui-tabbar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    height: calc(var(--tabbar-h) + var(--safe-b)); padding: 0 6px var(--safe-b);
+    background: rgba(255, 255, 255, .97); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line); box-shadow: 0 -4px 18px rgba(20, 24, 40, .06);
+  }
+  .ui-tabbar > a, .ui-more > summary {
+    position: relative; z-index: 1; flex: 1 1 0; min-width: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    height: var(--tabbar-h); border-radius: 12px; list-style: none; cursor: pointer;
+    color: var(--muted); font-size: 11px; font-weight: 650; line-height: 1.1; text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ui-more > summary::-webkit-details-marker { display: none; }
+  .ui-tabbar > a span, .ui-more > summary span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ui-tabbar .ui-i, .ui-more > summary svg { width: 22px; height: 22px; }
+  .ui-tabbar > a:active, .ui-more > summary:active { background: var(--line-2); }
+  .ui-tabbar > a.is-active, .ui-more.is-active > summary, .ui-more[open] > summary { color: var(--brand-700); }
+  .ui-tabbar > a.is-active::before, .ui-more.is-active > summary::before {
+    content: ""; position: absolute; top: 0; left: 50%; width: 30px; height: 3px; margin-left: -15px;
+    border-radius: 0 0 4px 4px; background: var(--brand);
+  }
+
+  .ui-more { flex: 1 1 0; display: flex; min-width: 0; }
+  .ui-more > summary { width: 100%; }
+  .ui-more[open]::before { content: ""; position: fixed; inset: 0; z-index: 0; background: rgba(20, 24, 40, .4); }
+  .ui-more-sheet {
+    position: fixed; z-index: 2; left: 10px; right: 10px; bottom: calc(var(--tabbar-h) + var(--safe-b) + 10px);
+    max-height: 70vh; overflow-y: auto; padding: 8px; border: 1px solid var(--line); border-radius: 18px;
+    background: #fff; box-shadow: 0 -10px 40px rgba(20, 24, 40, .22);
+  }
+  .ui-more-sheet h3 { margin: 6px 10px 6px; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+  .ui-more-sheet a, .ui-more-sheet button {
+    display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 10px 12px; border: 0; border-radius: 12px;
+    background: transparent; color: var(--ink-2); font: inherit; font-size: 15px; font-weight: 600; text-align: left; text-decoration: none; cursor: pointer;
+  }
+  .ui-more-sheet a:active, .ui-more-sheet button:active { background: var(--line-2); }
+  .ui-more-sheet a.is-active { background: var(--brand-50); color: var(--brand-700); }
+  .ui-more-sheet .is-danger { color: var(--bad); }
+  .ui-more-sheet hr { margin: 6px 4px; border: 0; border-top: 1px solid var(--line-2); }
+
+  /* ---- compact, sticky top bar ---- */
+  .ui-topbar {
+    position: sticky; top: 0; z-index: 30; min-height: 56px; gap: 10px;
+    padding: calc(8px + var(--safe-t)) 14px 8px;
+  }
+  .ui-topbar-brand { display: inline-flex; flex: none; }
+  .ui-topbar-title { flex: 1 1 auto; min-width: 0; }
+  .ui-topbar-title strong { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ui-topbar-title small { display: none; }
+  .ui-canteen-chip { flex: 0 1 auto; max-width: 42vw; padding: 4px 10px; font-size: 12px; overflow: hidden; white-space: nowrap; }
+  .ui-canteen-switch { margin: 0; min-width: 0; }
+  .ui-canteen-switch label { display: none; }
+  .ui-canteen-switch select { max-width: 40vw; min-height: 36px; font-size: 14px; }
+  details.ui-menu { flex: none; margin-left: 0; }
+  details.ui-menu > summary { padding: 3px; }
+  .ui-account-name, details.ui-menu > summary > svg { display: none; }
+  .ui-menu-panel { position: fixed; left: 12px; right: 12px; top: calc(60px + var(--safe-t)); min-width: 0; }
+
+  /* ---- page content ---- */
+  .ui-content { padding: 14px 14px 28px; }
+  .ui-page-head { gap: 10px; margin-bottom: 14px; }
+  .ui-page-head h1 { font-size: 20px; }
+  .ui-content h1 { font-size: 22px; line-height: 1.25; letter-spacing: -.01em; }
+  .ui-page-head .ui-actions { width: 100%; margin-left: 0; }
+  .ui-page-head .ui-actions > * { flex: 1 1 0; }
+  .ui-card-pad { padding: 16px; }
+  .ui-card-head { margin-bottom: 12px; }
+
+  .ui-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ui-stat { padding: 14px; }
+  .ui-stat strong { font-size: 22px; }
+  .ui-stat span.ui-stat-label { font-size: 12.5px; }
+  .ui-stat-icon { width: 32px; height: 32px; margin-bottom: 4px; }
+
+  /* touch-friendly controls; 16px text stops iOS zooming into fields */
+  .ui-btn { min-height: 44px; }
+  .ui-btn--sm { min-height: 38px; }
+  .ui-body input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),
+  .ui-body select, .ui-body textarea { font-size: 16px; min-height: 44px; }
+  .ui-body textarea { min-height: 96px; }
+  .ui-switch { padding: 12px; }
+
+  /* cashier board */
+  .board-bar { gap: 10px; margin-bottom: 14px; }
+  .board-search { flex: 1 1 100%; max-width: none; }
+  .board-chips { margin-left: 0; }
+  .board { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .board-col { padding: 10px; min-height: 0; }
+  .order { padding: 14px; }
+  .order-foot { align-items: stretch; }
+  .order-actions { width: 100%; }
+  .order-actions > .ui-btn, .order-actions > form { flex: 1 1 calc(50% - 4px); }
+  .order-actions form .ui-btn { width: 100%; }
+
+  .ui-chart { gap: 6px; height: 160px; }
+  .pay-grid { gap: 12px; }
+
+  /* confirm dialog slides up from the bottom like a phone sheet */
+  dialog.ui-modal { width: 100%; max-width: none; margin: auto 0 0; border-radius: 20px 20px 0 0; padding-bottom: var(--safe-b); }
+  .ui-modal-actions > .ui-btn { flex: 1; }
+  .ui-toasts { left: 12px; right: 12px; bottom: calc(var(--tabbar-h) + var(--safe-b) + 12px); max-width: none; }
+}
+
+/* ---- older cashier pages (transactions, payment records) ---- */
+@media (max-width: 900px) {
+  .cashier-records-page { padding: 0 !important; }
+  .cashier-records-page > div:first-child { flex-wrap: wrap; align-items: flex-start; gap: 10px; }
+  .cashier-records-page h1 { font-size: 21px; line-height: 1.25; }
+  .cashier-records-page a.rounded-full, .cashier-records-page a.rounded-xl,
+  .cashier-records-page .records-filters > a {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px !important;
+    border: 1px solid var(--line); border-radius: 10px !important; background: #fff !important; color: var(--ink) !important;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+  }
+  .cashier-records-page .records-filters { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px !important; }
+  .cashier-records-page .records-filters input { width: 100%; min-width: 0; padding: 10px 12px !important; border: 1px solid #d5d9e2; border-radius: 10px !important; background: #fff; }
+  .cashier-records-page .records-filters button { min-height: 44px; padding: 10px 16px !important; border-radius: 10px !important; background: var(--brand) !important; color: #fff !important; font-weight: 600; }
+  .cashier-records-page .records-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+  .cashier-records-page .records-summary-grid > div { padding: 14px !important; }
+  .cashier-records-page .records-table-card { padding: 0 !important; background: transparent !important; box-shadow: none !important; overflow: visible !important; }
+}
+
+/* ---- tables turn into cards on phones (labels are added by the layout script) ---- */
+@media (max-width: 760px) {
+  .ui-content table.is-stack { display: block; width: 100%; min-width: 0 !important; border: 0; }
+  .ui-content table.is-stack thead { display: none; }
+  .ui-content table.is-stack tbody, .ui-content table.is-stack tfoot { display: grid; gap: 10px; }
+  .ui-content table.is-stack tfoot { margin-top: 10px; }
+  .ui-content table.is-stack tr {
+    display: grid; gap: 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px;
+    background: #fff; box-shadow: var(--shadow);
+  }
+  .ui-content table.is-stack td {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    width: auto; padding: 7px 0 !important; border: 0 !important; background: transparent !important;
+    text-align: right; font-size: 14px; word-break: break-word;
+  }
+  .ui-content table.is-stack td[data-label]::before {
+    content: attr(data-label); flex: none; max-width: 42%; color: var(--muted);
+    font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; text-align: left;
+  }
+  .ui-content table.is-stack td:first-child {
+    justify-content: flex-start; margin-bottom: 4px; padding: 4px 0 10px !important;
+    border-bottom: 1px solid var(--line-2) !important; text-align: left; font-size: 15px; font-weight: 700;
+  }
+  .ui-content table.is-stack td:first-child::before { display: none; }
+  .ui-content table.is-stack td.is-wide { display: block; text-align: center; }
+  .ui-content table.is-stack td.is-empty { display: none; }
+  .ui-content table.is-stack td.is-actions { justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding-top: 10px !important; }
+  .ui-content table.is-stack td.is-actions > * { flex: 0 0 auto; }
+}

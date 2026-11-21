@@ -1,0 +1,53 @@
+/* Cecilian Bites — dish photo field + photo editor dialog */
+
+.photo-field { display: grid; gap: 12px; padding: 12px; border: 1.5px dashed var(--brand-200, #fbd5a0); border-radius: 16px; background: rgba(255, 255, 255, .55); transition: background .15s, border-color .15s; }
+.photo-field.is-over { border-color: var(--brand, #e25806); background: #fff; }
+.photo-field .dish-img { border-radius: 12px; box-shadow: 0 1px 3px rgba(20, 24, 40, .12); }
+.photo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.photo-actions .ui-btn { flex: 1 1 auto; min-height: 42px; }
+.photo-status { margin: 0; padding: 8px 12px; border-radius: 10px; background: var(--ok-bg, #e8f7ee); color: #14532d; font-size: 13px; font-weight: 600; }
+.photo-hint { margin: 0; color: var(--muted, #6b7385); font-size: 12.5px; line-height: 1.5; }
+.photo-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.photo-field:focus-within .photo-pick { outline: 3px solid var(--brand-200, #fbd5a0); outline-offset: 2px; }
+
+dialog.pc-dialog { width: min(680px, calc(100% - 24px)); max-width: none; max-height: calc(100vh - 24px); margin: auto; padding: 0; border: 0; border-radius: 20px; background: #fff; color: var(--ink, #2b1409); box-shadow: 0 30px 80px rgba(20, 24, 40, .4); font-family: var(--font, system-ui, sans-serif); overflow: hidden; }
+dialog.pc-dialog::backdrop { background: rgba(20, 24, 40, .55); backdrop-filter: blur(2px); }
+.pc-sheet { display: grid; gap: 14px; padding: 18px 20px 18px; max-height: 100vh; overflow-y: auto; }
+.pc-head { display: flex; align-items: flex-start; gap: 12px; }
+.pc-head > div { flex: 1; min-width: 0; }
+.pc-head h3 { margin: 0; font-size: 18px; letter-spacing: -.01em; }
+.pc-head p { margin: 2px 0 0; color: var(--muted, #6b7385); font-size: 13.5px; }
+.pc-x { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--line-2, #f0f1f5); color: var(--ink-2, #5b4636); font-size: 22px; line-height: 1; cursor: pointer; }
+.pc-x:hover { background: #e4e6ee; }
+
+.pc-stage { position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 14px; background: #1b1b1f; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; outline: none; }
+.pc-stage.is-drag { cursor: grabbing; }
+.pc-stage:focus-visible { box-shadow: 0 0 0 3px var(--brand-200, #fbd5a0); }
+.pc-img { position: absolute; top: 0; left: 0; max-width: none; transform-origin: 0 0; pointer-events: none; will-change: transform; }
+.pc-grid { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .2s;
+  background:
+    linear-gradient(to right, transparent calc(33.333% - .5px), rgba(255,255,255,.7) calc(33.333% - .5px), rgba(255,255,255,.7) calc(33.333% + .5px), transparent calc(33.333% + .5px), transparent calc(66.666% - .5px), rgba(255,255,255,.7) calc(66.666% - .5px), rgba(255,255,255,.7) calc(66.666% + .5px), transparent calc(66.666% + .5px)),
+    linear-gradient(to bottom, transparent calc(33.333% - .5px), rgba(255,255,255,.7) calc(33.333% - .5px), rgba(255,255,255,.7) calc(33.333% + .5px), transparent calc(33.333% + .5px), transparent calc(66.666% - .5px), rgba(255,255,255,.7) calc(66.666% - .5px), rgba(255,255,255,.7) calc(66.666% + .5px), transparent calc(66.666% + .5px)); }
+.pc-stage.is-drag .pc-grid, .pc-stage:focus-visible .pc-grid { opacity: 1; }
+.pc-stage::after { content: ""; position: absolute; inset: 0; border: 2px solid rgba(255, 255, 255, .85); border-radius: 14px; pointer-events: none; }
+
+.pc-warn { margin: 0; padding: 9px 12px; border-radius: 10px; background: var(--warn-bg, #fff3d6); color: #7a4a05; font-size: 13px; font-weight: 600; }
+.pc-zoom { display: flex; align-items: center; gap: 12px; }
+.pc-zoom input[type=range] { flex: 1; height: 28px; accent-color: var(--brand, #e25806); cursor: pointer; }
+.pc-round { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border: 1px solid var(--line, #e7e9ef); border-radius: 50%; background: #fff; color: var(--ink, #2b1409); font-size: 22px; line-height: 1; cursor: pointer; }
+.pc-round:hover { background: var(--line-2, #f0f1f5); }
+.pc-foot { display: flex; align-items: center; gap: 10px; padding-top: 4px; }
+.pc-spacer { flex: 1; }
+.pc-btn { min-height: 44px; padding: 10px 18px; border: 1px solid var(--line, #e7e9ef); border-radius: 12px; background: #fff; color: var(--ink, #2b1409); font: inherit; font-size: 14.5px; font-weight: 650; cursor: pointer; }
+.pc-btn:hover { background: var(--line-2, #f0f1f5); }
+.pc-btn--primary { border-color: var(--brand, #e25806); background: var(--brand, #e25806); color: #fff; }
+.pc-btn--primary:hover { background: var(--brand-600, #c94d05); }
+.pc-btn--ghost { border-color: transparent; background: transparent; color: var(--ink-2, #5b4636); }
+
+@media (max-width: 600px) {
+  dialog.pc-dialog { width: 100%; max-height: 100vh; margin: auto 0 0; border-radius: 20px 20px 0 0; }
+  .pc-sheet { padding: 16px 14px calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .pc-foot { flex-wrap: wrap; }
+  .pc-foot .pc-btn--primary { flex: 1 1 100%; order: -1; }
+  .pc-foot .pc-btn:not(.pc-btn--primary):not(.pc-btn--ghost) { flex: 1; }
+}

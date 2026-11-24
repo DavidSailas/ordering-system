@@ -45,29 +45,32 @@ test('a signed-in customer\'s cart belongs to their account and takes over the g
 });
 
 test('checkout uses catalog prices and records order lines', function () {
+    $customer = verifiedCustomer();
     $food = MenuItem::factory()->create(['price' => 125.50]);
-    CartItem::create(['guest_token' => 'tok', 'menu_item_id' => $food->id, 'quantity' => 2]);
-    $this->withCookie('shop_cart', 'tok')->withSession(['shop.checkout_token' => 'test-token'])
+    CartItem::create(['user_id' => $customer->id, 'menu_item_id' => $food->id, 'quantity' => 2]);
+    $this->actingAs($customer)->withSession(['shop.checkout_token' => 'test-token'])
         ->post('/checkout', ['customer_name' => 'Jonna', 'phone' => '09123456789', 'room' => '101', 'checkout_token' => 'test-token', 'payment_choice' => 'cash', 'total' => 1])
         ->assertRedirect(route('shop.orders'));
     expect(CartItem::count())->toBe(0);
     $order = Order::firstOrFail();
     expect($order->total)->toBe('251.00');
+    expect($order->user_id)->toBe($customer->id);
     expect($order->items->first()->quantity)->toBe(2);
-    $this->get('/my-orders')->assertOk()->assertSee($order->number);
-    $this->post('/checkout', ['customer_name' => 'Jonna', 'phone' => '09123456789', 'room' => '101', 'checkout_token' => 'test-token'])
+    $this->actingAs($customer)->get('/my-orders')->assertOk()->assertSee($order->number);
+    $this->actingAs($customer)->post('/checkout', ['customer_name' => 'Jonna', 'phone' => '09123456789', 'room' => '101', 'checkout_token' => 'test-token'])
         ->assertSessionHasErrors();
     expect(Order::count())->toBe(1);
 });
 
-test('unavailable items are rejected and another session cannot see orders', function () {
+test('unavailable items are rejected and another customer cannot see orders', function () {
+    $customer = verifiedCustomer();
     $food = MenuItem::factory()->unavailable()->create();
     $this->post('/cart', ['menu_item_id' => $food->id, 'quantity' => 1, 'action' => 'add'])->assertSessionHasErrors();
-    CartItem::create(['guest_token' => 'tok', 'menu_item_id' => $food->id, 'quantity' => 1]);
-    $this->withCookie('shop_cart', 'tok')->withSession(['shop.checkout_token' => 'test-token'])
+    CartItem::create(['user_id' => $customer->id, 'menu_item_id' => $food->id, 'quantity' => 1]);
+    $this->actingAs($customer)->withSession(['shop.checkout_token' => 'test-token'])
         ->post('/checkout', ['customer_name' => 'Jonna', 'phone' => '09123456789', 'room' => '101', 'checkout_token' => 'test-token'])
         ->assertSessionHasErrors();
     expect(Order::count())->toBe(0);
-    $order = Order::factory()->create();
-    $this->get('/my-orders')->assertOk()->assertDontSee('Order #'.$order->number);
+    $order = Order::factory()->create(['user_id' => verifiedCustomer()->id]);
+    $this->actingAs($customer)->get('/my-orders')->assertOk()->assertDontSee('Order #'.$order->number);
 });

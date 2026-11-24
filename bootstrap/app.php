@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\ApplyCanteenContext;
 use App\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\RequireCampusPass;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Foundation\Application;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
             'super_admin' => EnsureSuperAdmin::class,
+            'campus_pass' => RequireCampusPass::class,
         ]);
 
         $middleware->web(append: [

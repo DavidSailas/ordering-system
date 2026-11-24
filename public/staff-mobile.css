@@ -6,6 +6,12 @@
 
 .ui-tabbar, .ui-topbar-brand { display: none; }
 
+/* "Report fake order" link at the bottom of an unpaid order card (all screen sizes) */
+.order-report-row { display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.order-report-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border: 0; border-radius: 8px; background: none; color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.order-report-btn .ui-i { width: 14px; height: 14px; }
+.order-report-btn:hover, .order-report-btn:focus-visible { background: var(--bad-bg); color: var(--bad); }
+
 @media (max-width: 900px) {
   :root { --tabbar-h: 62px; --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px); }
 

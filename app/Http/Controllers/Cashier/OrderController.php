@@ -24,6 +24,9 @@ class OrderController extends Controller
             if ($status === OrderStatus::Completed && ! $locked->paid_at) {
                 return 'Order #'.$locked->number.' must be paid before it can be completed.';
             }
+            if ($locked->status === OrderStatus::AwaitingPayment && $status !== OrderStatus::Canceled) {
+                return 'Order #'.$locked->number.' must be paid before the kitchen starts on it.';
+            }
             if (! $locked->status->canTransitionTo($status)) {
                 return 'Order #'.$locked->number.' cannot move from '.$locked->status->label().' to '.$status->label().'.';
             }

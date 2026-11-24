@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $topDishes = DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->where('orders.canteen_id', \App\Support\CurrentCanteen::id())
-            ->where('orders.status', '!=', OrderStatus::Canceled->value)
+            ->whereNotIn('orders.status', [OrderStatus::Canceled->value, OrderStatus::AwaitingPayment->value])
             ->whereBetween('orders.created_at', [$weekStart, now()->endOfDay()])
             ->selectRaw('order_items.name as name, sum(order_items.quantity) as quantity')
             ->groupBy('order_items.name')

@@ -3,7 +3,7 @@
   <div class="cb-order-progress" aria-label="Order status">
     @foreach(['Order placed', 'Preparing', 'Ready', 'Completed'] as $stepIndex => $step)
       @php
-        $stage = match($order->status->value) { 'in_progress' => 1, 'ready_to_serve' => 2, 'completed' => 3, default => -1 };
+        $stage = match($order->status->value) { 'awaiting_payment' => 0, 'in_progress' => 1, 'ready_to_serve' => 2, 'completed' => 3, default => -1 };
       @endphp
       <div class="cb-order-step {{ $stage >= $stepIndex ? 'is-done' : '' }}"><span class="cb-order-dot">{{ $stage >= $stepIndex ? '✓' : $stepIndex + 1 }}</span><small>{{ $step }}</small></div>
     @endforeach
@@ -15,7 +15,7 @@
       <div><span><b>{{ $item->quantity }}×</b> {{ $item->name }}</span><strong>₱{{ number_format($item->price * $item->quantity, 2) }}</strong></div>
     @endforeach
   </div>
-  <div class="cb-order-card-bottom"><div><small>@if($order->paid_at) Paid{{ in_array($order->payment_method, ['gcash', 'maya']) ? ' via '.($order->payment_method === 'gcash' ? 'GCash' : 'Maya') : '' }} @elseif($order->customer_payment_ref) {{ $order->payment_choice === 'gcash' ? 'GCash' : 'Maya' }} payment submitted · awaiting confirmation @elseif(in_array($order->payment_choice, ['gcash', 'maya'])) Awaiting {{ $order->payment_choice === 'gcash' ? 'GCash' : 'Maya' }} payment @else Payment at pickup @endif</small><strong>₱{{ number_format($order->total, 2) }}</strong></div><p>@switch($order->status->value) @case('ready_to_serve') Your order is ready for pickup! @break @case('completed') Thank you for ordering with us! @break @case('canceled') This order was cancelled. @break @default We're preparing your order. @endswitch</p></div>
+  <div class="cb-order-card-bottom"><div><small>@if($order->paid_at) Paid{{ in_array($order->payment_method, ['gcash', 'maya']) ? ' via '.($order->payment_method === 'gcash' ? 'GCash' : 'Maya') : '' }} @elseif($order->customer_payment_ref) {{ $order->payment_choice === 'gcash' ? 'GCash' : 'Maya' }} payment submitted · awaiting confirmation @elseif(in_array($order->payment_choice, ['gcash', 'maya'])) Awaiting {{ $order->payment_choice === 'gcash' ? 'GCash' : 'Maya' }} payment @else {{ $order->isDelivery() ? 'Payment needed before delivery' : 'Pay at the counter to start your order' }} @endif</small><strong>₱{{ number_format($order->total, 2) }}</strong></div><p>@switch($order->status->value) @case('awaiting_payment') We start preparing as soon as your payment is confirmed. It cancels itself at {{ $order->autoCancelAt()->format('g:i A') }} if it is not paid. @break @case('ready_to_serve') {{ $order->isDelivery() ? 'Your order is on its way to you!' : 'Your order is ready for pickup!' }} @break @case('completed') Thank you for ordering with us! @break @case('canceled') {{ $order->paid_at ? 'This order was cancelled.' : 'This order was cancelled before it was paid.' }} @break @default We're preparing your order. @endswitch</p></div>
   @php $payAccounts = \App\Support\StorePayments::available(); @endphp
   @if(!$order->paid_at && $order->status->value !== 'canceled' && $payAccounts)
     <div class="cb-order-pay">

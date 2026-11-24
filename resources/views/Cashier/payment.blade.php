@@ -32,7 +32,10 @@
                 <div class="pay-line"><span>{{ $item->quantity }} × {{ $item->name }}</span><strong>{{ $currency }}{{ number_format($item->price * $item->quantity, 2) }}</strong></div>
             @endforeach
 
-            <div class="pay-line" style="margin-top:6px"><span>Subtotal</span><strong>{{ $currency }}{{ number_format($order->total, 2) }}</strong></div>
+            <div class="pay-line" style="margin-top:6px"><span>Subtotal</span><strong>{{ $currency }}{{ number_format($order->foodSubtotal(), 2) }}</strong></div>
+            @if ((float) $order->delivery_fee > 0)
+                <div class="pay-line"><span>Delivery fee</span><strong>{{ $currency }}{{ number_format($order->delivery_fee, 2) }}</strong></div>
+            @endif
 
             @if ($order->paid_at)
                 <div class="pay-line"><span>Discount</span><strong>−{{ $currency }}{{ number_format($order->discount, 2) }}</strong></div>

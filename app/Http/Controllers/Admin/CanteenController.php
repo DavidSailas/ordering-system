@@ -61,6 +61,8 @@ class CanteenController extends Controller
             'sort_order' => (int) Canteen::query()->max('sort_order') + 1,
         ]);
 
+        \App\Models\DeliveryZone::seedDefaultsFor($canteen);
+
         $request->session()->put('staff.canteen_id', $canteen->id);
 
         return redirect()

@@ -52,6 +52,7 @@
                         @php
                             $next = $order->status->next();
                             $statusClasses = match ($order->status) {
+                                OrderStatus::AwaitingPayment => 'bg-amber-200 text-amber-950',
                                 OrderStatus::InProgress => 'bg-lime-300 text-lime-950',
                                 OrderStatus::ReadyToServe => 'bg-sky-300 text-sky-950',
                                 OrderStatus::Canceled => 'bg-rose-300 text-rose-950',

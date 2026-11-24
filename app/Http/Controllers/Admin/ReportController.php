@@ -32,7 +32,7 @@ class ReportController extends Controller
             ->countedAsSales()
             ->placedBetween($from, $to)
             ->with('user:id,name')
-            ->get(['id', 'user_id', 'type', 'total', 'created_at']);
+            ->get(['id', 'user_id', 'type', 'total', 'delivery_fee', 'created_at']);
 
         $revenue = (float) $orders->sum('total');
 
@@ -41,7 +41,7 @@ class ReportController extends Controller
             ->leftJoin('menu_items', 'menu_items.id', '=', 'order_items.menu_item_id')
             ->leftJoin('categories', 'categories.id', '=', 'menu_items.category_id')
             ->where('orders.canteen_id', \App\Support\CurrentCanteen::id())
-            ->where('orders.status', '!=', OrderStatus::Canceled->value)
+            ->whereNotIn('orders.status', [OrderStatus::Canceled->value, OrderStatus::AwaitingPayment->value])
             ->whereBetween('orders.created_at', [$from, $to])
             ->selectRaw('order_items.name as dish, categories.name as category, sum(order_items.quantity) as quantity, sum(order_items.price * order_items.quantity) as revenue')
             ->groupBy('order_items.name', 'categories.name')
@@ -65,6 +65,7 @@ class ReportController extends Controller
             'from' => $from,
             'to' => $to,
             'revenue' => $revenue,
+            'deliveryFees' => (float) $orders->sum('delivery_fee'),
             'orderCount' => $orders->count(),
             'averageOrder' => $orders->isEmpty() ? 0.0 : $revenue / $orders->count(),
             'itemsSold' => (int) $itemRows->sum('quantity'),

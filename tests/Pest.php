@@ -48,3 +48,12 @@ function something()
 {
     // ..
 }
+
+/** A customer account tied to an ID on the school list (the only kind that may order). */
+function verifiedCustomer(array $attributes = []): \App\Models\User
+{
+    $user = \App\Models\User::factory()->customer()->create($attributes);
+    \App\Models\SchoolMember::factory()->create(['user_id' => $user->id, 'name' => $user->name]);
+
+    return $user;
+}

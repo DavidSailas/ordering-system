@@ -3,6 +3,7 @@
 use App\Enums\UserRole;
 use App\Mail\RegistrationCodeMail;
 use Illuminate\Support\Facades\Mail;
+use App\Models\SchoolMember;
 use App\Models\User;
 
 test('guests are redirected to the login page', function () {
@@ -11,7 +12,7 @@ test('guests are redirected to the login page', function () {
 });
 
 test('the login and register screens render', function () {
-    $this->get(route('login'))->assertOk()->assertSee('Sign in to your workspace')->assertSee('Email address')->assertSee('Password');
+    $this->get(route('login'))->assertOk()->assertSee('Create an account with your school ID')->assertSee('Email address')->assertSee('Password');
     $this->get(route('register'))->assertOk()->assertSee('Create your account')->assertSee('Confirm password');
 });
 
@@ -78,9 +79,11 @@ test('logging in requires an email and a password', function () {
 
 test('registering emails a code and only creates the account once it is confirmed', function () {
     Mail::fake();
+    $member = SchoolMember::factory()->create(['id_number' => '2024-0100', 'name' => 'Maria Cruz']);
 
     $this->post(route('register'), [
         'name' => 'Maria Cruz',
+        'school_id' => '2024-0100', 'last_name' => 'Cruz',
         'email' => 'maria@example.com',
         'password' => 'secret-pass-123',
         'password_confirmation' => 'secret-pass-123',
@@ -101,13 +104,16 @@ test('registering emails a code and only creates the account once it is confirme
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', ['email' => 'maria@example.com', 'name' => 'Maria Cruz', 'role' => 'customer']);
     expect(User::query()->where('email', 'maria@example.com')->sole()->email_verified_at)->not->toBeNull();
+    expect($member->fresh()->user_id)->toBe(User::query()->where('email', 'maria@example.com')->value('id'));
 });
 
 test('a wrong verification code does not create an account', function () {
     Mail::fake();
+    SchoolMember::factory()->create(['id_number' => '2024-0100', 'name' => 'Maria Cruz']);
 
     $this->post(route('register'), [
         'name' => 'Maria Cruz',
+        'school_id' => '2024-0100', 'last_name' => 'Cruz',
         'email' => 'maria@example.com',
         'password' => 'secret-pass-123',
         'password_confirmation' => 'secret-pass-123',
@@ -123,8 +129,10 @@ test('a wrong verification code does not create an account', function () {
 
 test('registering can never create a staff or admin account', function () {
     Mail::fake();
+    SchoolMember::factory()->create(['id_number' => '2024-0200', 'name' => 'Sneaky Person']);
 
     $this->post(route('register'), [
+        'school_id' => '2024-0200', 'last_name' => 'Sneaky',
         'role' => 'admin',
         'admin_code' => 'anything',
         'name' => 'Sneaky',

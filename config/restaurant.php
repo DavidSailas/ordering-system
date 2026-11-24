@@ -29,6 +29,10 @@ return [
     // When false the storefront still shows the menu but refuses new orders.
     'accepting_orders' => true,
 
+    // Delivery by the student runners. Each canteen switches it on or off (and sets the fees) on
+    // Admin → Delivery & fees; this is only the default.
+    'delivery_enabled' => true,
+
     // Buildings customers can pick at checkout. Empty = free-text field.
     'buildings' => [],
 
@@ -36,6 +40,40 @@ return [
     'payments' => [
         'gcash' => ['label' => 'GCash', 'number' => env('STORE_GCASH_NUMBER'), 'name' => env('STORE_GCASH_NAME', env('RESTAURANT_NAME', 'Cecilian Bites'))],
         'maya' => ['label' => 'Maya', 'number' => env('STORE_MAYA_NUMBER'), 'name' => env('STORE_MAYA_NAME', env('RESTAURANT_NAME', 'Cecilian Bites'))],
+    ],
+
+    // Campus pass (QR code posted at school): how long a scanned pass keeps working. The administrator
+    // switches the pass on or off, and replaces the QR code, on the "Order security" page.
+    'campus_pass' => [
+        'days' => (int) env('CAMPUS_PASS_DAYS', 30),
+    ],
+
+    // Pay first, then we cook: an order waits for payment, and cancels itself if it is not paid in time.
+    'unpaid_expiry_minutes' => (int) env('ORDER_UNPAID_EXPIRY_MINUTES', 15),
+    // If the customer already sent a GCash / Maya reference, the cashier gets longer to check it.
+    'unpaid_review_minutes' => (int) env('ORDER_UNPAID_REVIEW_MINUTES', 60),
+
+    // Customers must tap / scan their school ID (plus last name) to order. The administrator can switch this on
+    // under Admin → Order security; this is only the starting value.
+    'require_school_id' => (bool) env('ORDER_REQUIRE_SCHOOL_ID', false),
+
+    // Missed orders ("strikes"): an order nobody pays for in time counts against the phone number.
+    // After `max` of them the number is paused for `pause_days`, then it can order again by itself.
+    // Set ORDER_STRIKES_MAX=0 to switch strikes off.
+    'strikes' => [
+        'max' => (int) env('ORDER_STRIKES_MAX', 3),
+        'window_days' => (int) env('ORDER_STRIKES_WINDOW_DAYS', 30),
+        'pause_days' => (int) env('ORDER_STRIKES_PAUSE_DAYS', 3),
+    ],
+
+    // Stops prank orders. Set a value to 0 to switch that limit off.
+    'order_limits' => [
+        // Unpaid orders one phone number may have in progress at the same time.
+        'max_open_unpaid' => (int) env('ORDER_MAX_OPEN_UNPAID', 2),
+        // Unpaid orders in progress from one internet connection (a whole school can share one, so this is generous).
+        'max_open_unpaid_per_ip' => (int) env('ORDER_MAX_OPEN_UNPAID_PER_IP', 12),
+        // Biggest order (in pesos) that may be paid in cash; bigger ones are paid by GCash / Maya first.
+        'max_cash_total' => (int) env('ORDER_MAX_CASH_TOTAL', 500),
     ],
 
     'admin_registration_code' => env('ADMIN_REGISTRATION_CODE'),

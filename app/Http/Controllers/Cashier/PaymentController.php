@@ -15,7 +15,8 @@ class PaymentController extends Controller {
   $data=$request->validate(['payment_method'=>['required',Rule::in(['cash','gcash','maya'])], 'cash_received'=>['nullable','numeric','decimal:0,2','min:0','max:99999999.99'], 'payment_reference'=>['nullable','string','max:100'], 'discount'=>['nullable','numeric','decimal:0,2','min:0','max:99999999.99']]);
   DB::transaction(function() use($order,$request,$data) {
    $locked=Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
-   if($locked->paid_at || $locked->status===OrderStatus::Canceled) throw ValidationException::withMessages(['payment'=>'Order is already paid or canceled.']);
+   if($locked->paid_at) throw ValidationException::withMessages(['payment'=>'Order is already paid.']);
+   if($locked->status===OrderStatus::Canceled) throw ValidationException::withMessages(['payment'=>'Order #'.$locked->number.' was canceled (for example, it was not paid in time). Ask the customer to place a new order.']);
    $subtotal=(int)round((float)$locked->total*100); $discount=(int)round((float)($data['discount']??0)*100);
    if($discount>$subtotal) throw ValidationException::withMessages(['discount'=>'Discount cannot exceed subtotal.']);
    $due=$subtotal-$discount; $method=$data['payment_method']; $cash=(int)round((float)($data['cash_received']??0)*100);
@@ -23,6 +24,8 @@ class PaymentController extends Controller {
    if($method!=='cash' && blank($data['payment_reference']??null)) throw ValidationException::withMessages(['payment_reference'=>'Enter the verified transaction reference.']);
    $locked->update(['paid_at'=>now(),'paid_by'=>$request->user()->id,'payment_method'=>$method,'payment_reference'=>$method==='cash'?null:$data['payment_reference'], 'discount'=>$discount/100,'amount_paid'=>$due/100,'cash_received'=>$method==='cash'?$cash/100:null]);
    if($locked->status===OrderStatus::ReadyToServe) $locked->update(['status'=>OrderStatus::Completed]);
+   // Paid: only now does the order go to the kitchen (and, for delivery, later to a runner).
+   elseif($locked->status===OrderStatus::AwaitingPayment) $locked->update(['status'=>OrderStatus::InProgress]);
   });
   return redirect()->route('orders.payment',$order)->with('success','Payment recorded.');
  }

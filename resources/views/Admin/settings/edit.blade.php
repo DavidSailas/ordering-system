@@ -73,12 +73,9 @@
         </section>
 
         <section class="ui-card ui-card-pad ui-form">
-            <p class="ui-section-title" style="margin:0">Delivery locations</p>
-            <div class="ui-field">
-                <label for="buildings">Buildings</label>
-                <textarea id="buildings" name="buildings" rows="5" placeholder="Main Building&#10;Science Building&#10;Library">{{ old('buildings', $buildingsText) }}</textarea>
-                <small>One building per line. Customers pick one at checkout and type their room number. Leave empty to let them type the building themselves.</small>
-            </div>
+            <p class="ui-section-title" style="margin:0">Delivery locations &amp; fees</p>
+            <p style="margin:-6px 0 0;font-size:13px;color:var(--muted)">Buildings, floors and delivery fees now have their own page, with a record of every change.</p>
+            <p style="margin:8px 0 0"><a href="{{ route('admin.delivery.index') }}" class="ui-btn">Open Delivery &amp; fees →</a></p>
         </section>
 
         <section class="ui-card ui-card-pad ui-form">

@@ -2,8 +2,8 @@
 @section('title', 'My Orders · Cecilian Bites')
 @section('content')
 @php
-    $activeOrders = $orders->filter(fn ($order) => in_array($order->status->value, ['in_progress', 'ready_to_serve']));
-    $finishedOrders = $orders->reject(fn ($order) => in_array($order->status->value, ['in_progress', 'ready_to_serve']));
+    $activeOrders = $orders->filter(fn ($order) => in_array($order->status->value, ['awaiting_payment', 'in_progress', 'ready_to_serve']));
+    $finishedOrders = $orders->reject(fn ($order) => in_array($order->status->value, ['awaiting_payment', 'in_progress', 'ready_to_serve']));
 @endphp
 <section class="cb-orders-page">
   <div class="cb-orders-top"><div><p class="cb-orders-kicker">Order history</p><h1>My Orders</h1><p class="cb-orders-lead">Track your food, review past orders, and see when your pickup is ready.</p></div><a class="cb-orders-refresh" href="{{ route('shop.orders') }}"><svg class="icon" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg> Refresh</a></div>

@@ -40,8 +40,9 @@
         <p role="alert" class="mb-4 rounded-2xl bg-rose-100 px-4 py-2.5 text-sm text-rose-700">{{ $message }}</p>
     @enderror
 
-    <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <x-admin.stat label="Revenue" :value="$money($revenue)" />
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-6">
+        <x-admin.stat label="Revenue" :value="$money($revenue)" hint="Food + delivery fees" />
+        <x-admin.stat label="Delivery fees" :value="$money($deliveryFees)" hint="Included in revenue" />
         <x-admin.stat label="Orders" :value="$orderCount" />
         <x-admin.stat label="Average order" :value="$money($averageOrder)" />
         <x-admin.stat label="Items sold" :value="$itemsSold" />

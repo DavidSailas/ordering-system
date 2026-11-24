@@ -9,11 +9,12 @@ use Illuminate\Http\Request;
 
 class StorePaymentController extends Controller
 {
-    /** Customers may only pay for orders they placed in this browser session. */
+    /** Customers may only pay for their own orders (placed with their account, or in this browser session). */
     private function authorizeOrder(Request $request, Order $order): void
     {
         $mine = array_map('intval', $request->session()->get('shop.orders', []));
-        abort_unless(in_array($order->id, $mine, true), 404);
+        $ownsByAccount = $request->user() !== null && (int) $order->user_id === $request->user()->id;
+        abort_unless($ownsByAccount || in_array($order->id, $mine, true), 404);
     }
 
     private function blockedReason(Order $order, string $method): ?string

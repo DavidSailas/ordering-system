@@ -32,12 +32,17 @@ class Order extends Model
         'canteen_number',
         'customer_name',
         'phone',
+        'phone_key',
+        'ip_address',
+        'school_member_id',
         'building',
+        'floor',
         'room',
         'type',
         'status',
         'notes',
         'total',
+        'delivery_fee',
         'paid_at',
         'paid_by',
         'cash_received',
@@ -62,9 +67,11 @@ class Order extends Model
     protected function casts(): array
     {
         return [
+            'floor' => 'integer',
             'type' => OrderType::class,
             'status' => OrderStatus::class,
             'total' => 'decimal:2',
+            'delivery_fee' => 'decimal:2',
             'paid_at' => 'datetime',
             'cash_received' => 'decimal:2',
             'discount' => 'decimal:2', 'amount_paid' => 'decimal:2', 'refunded_at' => 'datetime', 'canceled_at' => 'datetime', 'payment_submitted_at' => 'datetime',
@@ -105,6 +112,38 @@ class Order extends Model
         return PaymentMethod::tryFrom((string) $this->payment_method) ?? PaymentMethod::Cash;
     }
 
+    /** @return BelongsTo<SchoolMember, $this> */
+    public function schoolMember(): BelongsTo
+    {
+        return $this->belongsTo(SchoolMember::class);
+    }
+
+    public function isAwaitingPayment(): bool
+    {
+        return $this->status === OrderStatus::AwaitingPayment;
+    }
+
+    /** When an unpaid order cancels itself (a payment the customer already sent gets longer to be checked). */
+    public function autoCancelAt(): CarbonInterface
+    {
+        $minutes = $this->customer_payment_ref
+            ? (int) config('restaurant.unpaid_review_minutes', 60)
+            : (int) config('restaurant.unpaid_expiry_minutes', 15);
+
+        return $this->created_at->copy()->addMinutes(max(1, $minutes));
+    }
+
+    public function isDelivery(): bool
+    {
+        return $this->type === OrderType::Delivery;
+    }
+
+    /** The food only: the order total without the delivery fee. */
+    public function foodSubtotal(): float
+    {
+        return max(0.0, (float) $this->total - (float) $this->delivery_fee);
+    }
+
     /** What the customer was (or will be) charged after any discount. */
     public function amountCharged(): float
     {
@@ -131,7 +170,7 @@ class Order extends Model
     }
 
     /**
-     * Where the customer wants the order brought, e.g. "Main Building · Room 204".
+     * Where the customer wants the order brought, e.g. "Annex · Floor 8 · Room 804".
      *
      * @return Attribute<string|null, never>
      */
@@ -140,6 +179,7 @@ class Order extends Model
         return Attribute::get(function (): ?string {
             $parts = array_filter([
                 $this->building,
+                $this->floor ? 'Floor '.$this->floor : null,
                 $this->room ? 'Room '.$this->room : null,
             ]);
 
@@ -170,7 +210,8 @@ class Order extends Model
      */
     public function scopeCountedAsSales(Builder $query): void
     {
-        $query->where('status', '!=', OrderStatus::Canceled->value);
+        // Orders still waiting for payment are not sales yet.
+        $query->whereNotIn('status', [OrderStatus::Canceled->value, OrderStatus::AwaitingPayment->value]);
     }
 
     /**

@@ -8,6 +8,7 @@
     $items = $order->items;
 
     $statusBadge = match ($order->status) {
+        OrderStatus::AwaitingPayment => ['ui-badge--brand', 'Waiting for payment'],
         OrderStatus::InProgress => ['ui-badge--warn', 'Preparing'],
         OrderStatus::ReadyToServe => ['ui-badge--info', 'Ready'],
         OrderStatus::Completed => ['ui-badge--ok', 'Completed'],
@@ -44,8 +45,21 @@
 
     @if ($order->location)
         <div class="order-loc"><x-icon name="map-pin" class="ui-i" /> {{ $order->location }}</div>
+
     @else
         <div class="order-loc order-loc--none"><x-icon name="store" class="ui-i" /> {{ $order->type->label() }}</div>
+    @endif
+
+    @if ($order->schoolMember)
+        <div class="order-loc"><x-icon name="users" class="ui-i" /> ID {{ $order->schoolMember->id_number }} · {{ ucfirst($order->schoolMember->kind) }}</div>
+    @endif
+
+    @if ($order->isAwaitingPayment())
+        <div class="order-loc" style="color:#b45309;font-weight:700"><x-icon name="wallet" class="ui-i" /> Do not prepare yet · cancels itself {{ $order->autoCancelAt()->diffForHumans() }}</div>
+    @endif
+
+    @if ($order->isAwaitingPayment() && ($missed = max((($strikes ?? collect())[$order->phone_key] ?? 0), (($memberStrikes ?? collect())[$order->school_member_id] ?? 0))) > 0)
+        <div class="order-loc" style="color:#b91c1c;font-weight:700"><x-icon name="alert" class="ui-i" /> {{ $missed }} missed {{ Str::plural('order', $missed) }} before ({{ \App\Support\Strikes::max() }} = paused)</div>
     @endif
 
     <ul class="order-items">
@@ -83,7 +97,7 @@
             @endif
 
             @if (! $paid && $order->status !== OrderStatus::Canceled)
-                <a href="{{ route('orders.payment', $order) }}" class="ui-btn {{ $order->status === OrderStatus::ReadyToServe ? 'ui-btn--primary' : 'ui-btn--soft' }} ui-btn--sm"><x-icon name="wallet" class="ui-i ui-i--sm" />Collect payment</a>
+                <a href="{{ route('orders.payment', $order) }}" class="ui-btn {{ in_array($order->status, [OrderStatus::ReadyToServe, OrderStatus::AwaitingPayment], true) ? 'ui-btn--primary' : 'ui-btn--soft' }} ui-btn--sm"><x-icon name="wallet" class="ui-i ui-i--sm" />Collect payment</a>
             @else
                 <a href="{{ route('orders.payment', $order) }}" class="ui-btn ui-btn--sm"><x-icon name="receipt" class="ui-i ui-i--sm" />Receipt</a>
             @endif
@@ -97,4 +111,13 @@
             @endif
         </div>
     </div>
+
+    @if (! $paid && ! $order->status->isFinal() && filled($order->phone))
+        <div class="order-report-row">
+            <form method="POST" action="{{ route('orders.report-fake', $order) }}" data-confirm="Report order #{{ $order->number }} as a fake or prank order? It will be cancelled and {{ $order->phone }} will not be able to order again." data-confirm-title="Report fake order?" data-confirm-ok="Yes, report it">
+                @csrf
+                <button type="submit" class="order-report-btn"><x-icon name="alert" class="ui-i" />Report fake order</button>
+            </form>
+        </div>
+    @endif
 </article>

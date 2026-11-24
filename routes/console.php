@@ -51,3 +51,12 @@ Artisan::command('canteens:make-overall-admin {email}', function (string $email)
 Schedule::call(function () {
     \App\Models\CartItem::query()->whereNull('user_id')->where('updated_at', '<', now()->subDays(30))->delete();
 })->daily()->name('prune-old-guest-carts');
+
+// php artisan orders:expire-unpaid
+// Cancels orders that were not paid in time ("pay first, then we cook"). Runs every minute.
+Artisan::command('orders:expire-unpaid', function () {
+    $count = \App\Support\UnpaidOrders::expire();
+    $this->info("Cancelled {$count} unpaid order(s).");
+})->purpose('Cancel orders that were not paid in time');
+
+Schedule::command('orders:expire-unpaid')->everyMinute();

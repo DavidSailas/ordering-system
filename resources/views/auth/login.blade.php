@@ -1,7 +1,7 @@
-<x-layouts.guest title="Staff sign in">
-    <span class="auth-pill"><x-icon name="shield" class="auth-i" />Staff portal</span>
-    <h1>Sign in to your workspace</h1>
-    <p class="auth-sub">For administrators, canteen owners, cashiers and runners.</p>
+<x-layouts.guest title="Sign in">
+    <span class="auth-pill"><x-icon name="shield" class="auth-i" />Cecilian Bites</span>
+    <h1>Sign in</h1>
+    <p class="auth-sub">For students and employees who order, and for canteen owners, cashiers and runners.</p>
 
     @if (session('status'))
         <div class="auth-alert auth-alert--ok" role="status"><x-icon name="check-circle" class="auth-i" /><span>{{ session('status') }}</span></div>
@@ -25,8 +25,10 @@
         <button type="submit" class="auth-submit"><span class="auth-submit-label">Sign in</span><span class="auth-spinner" aria-hidden="true"></span></button>
     </form>
 
+    <p class="auth-alt">New student or employee? <a href="{{ route('register') }}">Create an account with your school ID</a></p>
+
     <div class="auth-help">
         <x-icon name="user" class="auth-i" />
-        <p><strong>Forgot your password or need an account?</strong><br>Ask your administrator or canteen owner. They can reset it for you.</p>
+        <p><strong>Forgot your password?</strong><br>Ask your administrator or canteen owner. They can reset it for you.</p>
     </div>
 </x-layouts.guest>

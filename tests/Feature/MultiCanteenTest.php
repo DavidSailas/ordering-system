@@ -126,9 +126,10 @@ test('a customer cannot add another canteen\'s dish to the cart', function () {
 test('an order is saved in the canteen the customer picked, with its own numbering', function () {
     Order::factory()->count(2)->create();
 
-    CartItem::create(['guest_token' => 'cart-tok', 'menu_item_id' => $this->brewDish->id, 'quantity' => 1]);
+    $customer = verifiedCustomer();
+    CartItem::create(['user_id' => $customer->id, 'menu_item_id' => $this->brewDish->id, 'quantity' => 1]);
 
-    $this->withCookie('shop_cart', 'cart-tok')->withSession([
+    $this->actingAs($customer)->withSession([
         'shop.canteen_id' => $this->brew->id,
         'shop.checkout_token' => 'tok',
     ])->post('/checkout', [
@@ -140,5 +141,5 @@ test('an order is saved in the canteen the customer picked, with its own numberi
 
     expect($order->canteen_id)->toEqual($this->brew->id)
         ->and($order->canteen_number)->toEqual(1)
-        ->and($order->room)->toBe('204');
+        ->and($order->type)->toBe(\App\Enums\OrderType::TakeAway);   // no fulfillment sent = pickup, so no room is kept
 });

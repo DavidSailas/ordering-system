@@ -73,7 +73,10 @@
 
         <hr class="rule">
 
-        <div class="row"><span>Subtotal</span><span>{{ $currency }}{{ number_format($order->total, 2) }}</span></div>
+        <div class="row"><span>Subtotal</span><span>{{ $currency }}{{ number_format($order->foodSubtotal(), 2) }}</span></div>
+        @if ((float) $order->delivery_fee > 0)
+            <div class="row"><span>Delivery fee</span><span>{{ $currency }}{{ number_format($order->delivery_fee, 2) }}</span></div>
+        @endif
 
         @if ($order->isPaid())
             @if ((float) $order->discount > 0)

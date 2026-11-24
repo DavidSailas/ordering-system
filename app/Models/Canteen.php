@@ -19,13 +19,13 @@ class Canteen extends Model
     /** @var list<string> */
     protected $fillable = [
         'name', 'slug', 'tagline', 'accent', 'logo_path', 'is_open', 'phone', 'address',
-        'receipt_footer', 'buildings', 'gcash_number', 'gcash_name', 'maya_number', 'maya_name', 'sort_order',
+        'receipt_footer', 'buildings', 'delivery_enabled', 'gcash_number', 'gcash_name', 'maya_number', 'maya_name', 'sort_order',
     ];
 
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['is_open' => 'boolean'];
+        return ['is_open' => 'boolean', 'delivery_enabled' => 'boolean'];
     }
 
     public function getRouteKeyName(): string
@@ -43,6 +43,12 @@ class Canteen extends Model
     public function staff(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /** @return HasMany<DeliveryZone, $this> */
+    public function deliveryZones(): HasMany
+    {
+        return $this->hasMany(DeliveryZone::class);
     }
 
     /** @return list<string> */
@@ -66,6 +72,7 @@ class Canteen extends Model
             'restaurant.logo_path' => $this->logo_path,
             'restaurant.accepting_orders' => (bool) $this->is_open,
             'restaurant.buildings' => $this->buildingList(),
+            'restaurant.delivery_enabled' => (bool) $this->delivery_enabled,
             'restaurant.payments.gcash.number' => $this->gcash_number,
             'restaurant.payments.gcash.name' => $this->gcash_name ?: $this->name,
             'restaurant.payments.maya.number' => $this->maya_number,

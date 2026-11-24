@@ -41,9 +41,10 @@ test('orders are refused while the canteen is closed', function () {
 
     $item = MenuItem::factory()->create();
 
-    CartItem::create(['guest_token' => 'tok', 'menu_item_id' => $item->id, 'quantity' => 1]);
+    $customer = verifiedCustomer();
+    CartItem::create(['user_id' => $customer->id, 'menu_item_id' => $item->id, 'quantity' => 1]);
 
-    $this->withCookie('shop_cart', 'tok')->withSession(['shop.checkout_token' => 'abc'])
+    $this->actingAs($customer)->withSession(['shop.checkout_token' => 'abc'])
         ->post(route('shop.purchase'), [
             'customer_name' => 'Jane', 'phone' => '09171234567', 'room' => '101',
             'payment_choice' => 'cash', 'checkout_token' => 'abc',

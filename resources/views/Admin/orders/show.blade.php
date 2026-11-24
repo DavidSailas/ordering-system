@@ -35,6 +35,12 @@
                     @endforeach
                 </tbody>
                 <tfoot>
+                    @if ((float) $order->delivery_fee > 0)
+                        <tr>
+                            <td colspan="3" class="pt-3 text-right text-neutral-600">Delivery fee</td>
+                            <td class="pt-3 text-right">{{ $currency }}{{ number_format($order->delivery_fee, 2) }}</td>
+                        </tr>
+                    @endif
                     <tr class="border-t border-neutral-200">
                         <td colspan="3" class="pt-3 text-right text-neutral-600">Order total</td>
                         <td class="pt-3 text-right text-base font-semibold">{{ $currency }}{{ number_format($order->total, 2) }}</td>
@@ -56,12 +62,25 @@
             <dl class="space-y-2 rounded-2xl bg-white/70 p-4">
                 <div class="flex justify-between gap-3"><dt class="text-neutral-500">Status</dt><dd><x-admin.status-badge :status="$order->status" /></dd></div>
                 <div class="flex justify-between gap-3"><dt class="text-neutral-500">Customer</dt><dd class="font-medium">{{ $order->customer_name }}</dd></div>
+                @if ($order->schoolMember)
+                    <div class="flex justify-between gap-3"><dt class="text-neutral-500">School ID</dt><dd class="font-medium">{{ $order->schoolMember->id_number }} · {{ ucfirst($order->schoolMember->kind) }}</dd></div>
+                @endif
                 <div class="flex justify-between gap-3"><dt class="text-neutral-500">Type</dt><dd class="font-medium">{{ $order->type->label() }}</dd></div>
                 @if ($order->location)
                     <div class="flex justify-between gap-3"><dt class="text-neutral-500">Deliver to</dt><dd class="font-medium text-right">{{ $order->location }}</dd></div>
                 @endif
                 @if ($order->phone)
                     <div class="flex justify-between gap-3"><dt class="text-neutral-500">Phone</dt><dd class="font-medium">{{ $order->phone }}</dd></div>
+                    <div class="flex justify-end">
+                        @if (\App\Models\BlockedPhone::isBlocked($order->phone))
+                            <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-medium text-rose-700">This number is blocked</span>
+                        @else
+                            <form method="POST" action="{{ route('orders.block-phone', $order) }}" data-confirm="Block {{ $order->phone }} from ordering?" data-confirm-title="Block this number?" data-confirm-ok="Yes, block">
+                                @csrf
+                                <button type="submit" class="rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-medium hover:bg-rose-100 hover:text-rose-700">Block this number</button>
+                            </form>
+                        @endif
+                    </div>
                 @endif
                 <div class="flex justify-between gap-3"><dt class="text-neutral-500">Cashier</dt><dd class="font-medium">{{ $order->user?->name ?? '—' }}</dd></div>
             </dl>

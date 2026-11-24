@@ -39,7 +39,7 @@
         </div>
       </form>
 
-      <p class="pay-secure">Your order stays unpaid until the cashier confirms the {{ $account['label'] }} payment. You can still pay at pickup instead.</p>
+      <p class="pay-secure">Your order stays unpaid until the cashier confirms the {{ $account['label'] }} payment.@if($order->isDelivery()) The runner brings your order once it is paid.@else You can still pay at pickup instead.@endif</p>
     </div>
 
     <aside class="panel summary">
@@ -47,6 +47,9 @@
       @foreach($order->items as $item)
         <div class="summary-line"><span>{{ $item->quantity }} × {{ $item->name }}</span><strong>₱{{ number_format($item->price * $item->quantity, 2) }}</strong></div>
       @endforeach
+      @if((float) $order->delivery_fee > 0)
+        <div class="summary-line"><span>Delivery fee</span><strong>₱{{ number_format($order->delivery_fee, 2) }}</strong></div>
+      @endif
       <div class="total"><span>Amount to send</span><strong>₱{{ number_format($order->total, 2) }}</strong></div>
     </aside>
   </div>

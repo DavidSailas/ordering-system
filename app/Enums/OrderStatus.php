@@ -4,6 +4,8 @@ namespace App\Enums;
 
 enum OrderStatus: string
 {
+    /** Placed but not paid yet: the kitchen and the runners do not see it until the cashier confirms payment. */
+    case AwaitingPayment = 'awaiting_payment';
     case InProgress = 'in_progress';
     case ReadyToServe = 'ready_to_serve';
     case Completed = 'completed';
@@ -12,6 +14,7 @@ enum OrderStatus: string
     public function label(): string
     {
         return match ($this) {
+            self::AwaitingPayment => 'Waiting for payment',
             self::InProgress => 'In Progress',
             self::ReadyToServe => 'Ready to Serve',
             self::Completed => 'Completed',

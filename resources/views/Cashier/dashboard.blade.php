@@ -20,12 +20,24 @@
     <div id="board-live">
         <div id="board" data-newest="{{ $newestId }}">
             <div class="board-chips" style="margin:0 0 14px">
+                <span class="ui-badge {{ $awaiting->count() ? 'ui-badge--brand' : '' }}">{{ $awaiting->count() }} waiting for payment</span>
                 <span class="ui-badge ui-badge--warn">{{ $preparing->count() }} preparing</span>
                 <span class="ui-badge ui-badge--info">{{ $ready->count() }} ready</span>
                 <span class="ui-badge {{ $unpaidCount ? 'ui-badge--brand' : '' }}">{{ $unpaidCount }} unpaid</span>
             </div>
 
             <div class="board">
+                <section class="board-col" aria-label="Waiting for payment">
+                    <div class="board-col-head"><x-icon name="wallet" class="ui-i" />Waiting for payment<span class="ui-count">{{ $awaiting->count() }}</span></div>
+                    <div class="board-col-body">
+                        @forelse ($awaiting as $order)
+                            @include('Cashier.partials.order-card', ['order' => $order])
+                        @empty
+                            <p class="board-empty">No orders are waiting for payment.</p>
+                        @endforelse
+                    </div>
+                </section>
+
                 <section class="board-col" aria-label="Preparing">
                     <div class="board-col-head"><x-icon name="chef" class="ui-i" />Preparing<span class="ui-count">{{ $preparing->count() }}</span></div>
                     <div class="board-col-body">

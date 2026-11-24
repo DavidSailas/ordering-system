@@ -6,12 +6,14 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Mail\RegistrationCodeMail;
+use App\Models\SchoolMember;
 use App\Models\User;
 use App\Support\ShopCart;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -44,6 +46,7 @@ class RegisterController extends Controller
             'name' => $request->validated('name'),
             'email' => $email,
             'password' => Hash::make($request->validated('password')),
+            'school_member_id' => $request->schoolMember()->id,
         ];
 
         if (! $this->sendCode($pending)) {
@@ -108,14 +111,33 @@ class RegisterController extends Controller
             return redirect()->route('login')->withErrors(['email' => 'This email is already registered. Please log in.']);
         }
 
-        $user = User::create([
-            'name' => $pending['name'],
-            'email' => $pending['email'],
-            'password' => $pending['password'], // already hashed
-            'role' => UserRole::Customer,
-        ]);
+        // The ID is claimed in the same moment the account is created, so one ID can never get two accounts.
+        $user = DB::transaction(function () use ($pending): ?User {
+            $member = SchoolMember::query()->lockForUpdate()->find($pending['school_member_id'] ?? 0);
 
-        $user->forceFill(['email_verified_at' => now()])->save();
+            if (! $member || $member->is_blocked || $member->isRegistered()) {
+                return null;
+            }
+
+            $user = User::create([
+                'name' => $pending['name'],
+                'email' => $pending['email'],
+                'password' => $pending['password'], // already hashed
+                'role' => UserRole::Customer,
+            ]);
+
+            $user->forceFill(['email_verified_at' => now()])->save();
+            $member->update(['user_id' => $user->id]);
+
+            return $user;
+        });
+
+        if (! $user) {
+            Cache::forget($this->key($email));
+            $request->session()->forget('register.email');
+
+            return redirect()->route('register')->withErrors(['school_id' => 'This school ID can no longer be used to register. Please ask the school office.']);
+        }
 
         Cache::forget($this->key($email));
         $request->session()->forget('register.email');
@@ -154,7 +176,7 @@ class RegisterController extends Controller
     /**
      * Create a fresh code, cache it (hashed) with the pending details and email it.
      *
-     * @param  array{name: string, email: string, password: string}  $pending
+     * @param  array{name: string, email: string, password: string, school_member_id: int}  $pending
      */
     private function sendCode(array $pending): bool
     {

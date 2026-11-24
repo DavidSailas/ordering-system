@@ -15,6 +15,7 @@
             ['Categories', 'admin.categories.index', 'admin.categories.*', 'tag'],
             ['Orders', 'admin.orders.index', 'admin.orders.*', 'clipboard-list'],
             ['Sales & Reports', 'admin.reports.index', 'admin.reports.*', 'bar-chart'],
+            ['Delivery & fees', 'admin.delivery.index', 'admin.delivery.*', 'map-pin'],
             ['Staff', 'admin.staff.index', 'admin.staff.*', 'users'],
             ['Settings', 'admin.settings.edit', 'admin.settings.*', 'settings'],
         ]
@@ -31,6 +32,8 @@
     $user = auth()->user();
 
     if ($isAdmin && $user->isSuperAdmin()) {
+        array_unshift($navigation, ['School IDs', 'admin.school-ids.index', 'admin.school-ids.*', 'users']);
+        array_unshift($navigation, ['Order security', 'admin.order-security.index', 'admin.order-security.*', 'shield']);
         array_unshift($navigation, ['Users & roles', 'admin.users.index', 'admin.users.*', 'users']);
         array_unshift($navigation, ['All canteens', 'admin.canteens.index', 'admin.canteens.*', 'store']);
     }

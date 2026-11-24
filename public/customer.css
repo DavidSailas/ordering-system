@@ -189,6 +189,7 @@ label{font-weight:600;font-size:14px}
 .cb-order-id{font-size:15px;font-weight:700}
 .cb-order-card-head p{margin-top:2px;color:var(--muted);font-size:13px}
 .cb-order-badge{padding:4px 11px;border-radius:99px;background:#eceff3;color:var(--ink-2);font-size:12px;font-weight:700;white-space:nowrap}
+.cb-order-badge--awaiting_payment{background:var(--warn-bg);color:var(--warn)}
 .cb-order-badge--in_progress{background:var(--warn-bg);color:var(--warn)}
 .cb-order-badge--ready_to_serve{background:var(--ok-bg);color:var(--ok)}
 .cb-order-badge--completed{background:var(--info-bg);color:var(--info)}

@@ -7,10 +7,12 @@ use App\Enums\OrderType;
 use App\Enums\UserRole;
 use App\Models\Canteen;
 use App\Models\Category;
+use App\Models\DeliveryZone;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Support\PhoneKey;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -103,6 +105,10 @@ class MockDataSeeder extends Seeder
 
     private function reset(): void
     {
+        DB::table('order_strikes')->delete();
+        DB::table('phone_suspensions')->delete();
+        DB::table('audit_logs')->delete();
+        DB::table('delivery_zones')->delete();
         DB::table('order_items')->delete();
         DB::table('orders')->delete();
         DB::table('menu_items')->delete();
@@ -116,7 +122,7 @@ class MockDataSeeder extends Seeder
     /** @param  array<string, mixed>  $d */
     private function seedCanteen(array $d, int $index): Canteen
     {
-        return Canteen::create([
+        $canteen = Canteen::create([
             'name' => $d['name'],
             'slug' => $d['slug'],
             'tagline' => $d['tagline'],
@@ -132,6 +138,10 @@ class MockDataSeeder extends Seeder
             'maya_name' => $d['maya'][1],
             'sort_order' => $index,
         ]);
+
+        DeliveryZone::seedDefaultsFor($canteen);
+
+        return $canteen;
     }
 
     /**
@@ -223,11 +233,15 @@ class MockDataSeeder extends Seeder
             for ($i = 0; $i < $count; $i++) {
                 $when = Carbon::now()->subDays($daysAgo)->setTime(mt_rand(8, 17), mt_rand(0, 59));
                 $canceled = mt_rand(1, 14) === 1;
+                $delivery = ! $canceled && mt_rand(1, 4) === 1;
+                $method = $this->pick(['cash', 'cash', 'cash', 'gcash', 'maya']);
 
                 $this->makeOrder($canteen, $items, $cashier, [
                     'status' => $canceled ? OrderStatus::Canceled : OrderStatus::Completed,
                     'paid' => ! $canceled,
-                    'method' => $this->pick(['cash', 'cash', 'cash', 'gcash', 'maya']),
+                    // delivery is always paid in advance, so never with cash
+                    'method' => $delivery && $method === 'cash' ? 'gcash' : $method,
+                    'delivery' => $delivery,
                 ], $when);
             }
         }
@@ -238,13 +252,18 @@ class MockDataSeeder extends Seeder
     {
         $now = Carbon::now();
 
+        // Pay first, then we cook: unpaid orders wait in "Waiting for payment" and only reach the kitchen once paid.
+        // (They cancel themselves after ORDER_UNPAID_EXPIRY_MINUTES, so seed again just before a demo.)
         $queue = [
-            ['status' => OrderStatus::InProgress, 'paid' => false, 'method' => 'cash', 'ago' => 2, 'notes' => 'No onions please.'],
-            ['status' => OrderStatus::InProgress, 'paid' => false, 'method' => 'gcash', 'ago' => 6],
-            ['status' => OrderStatus::InProgress, 'paid' => false, 'method' => 'maya', 'ago' => 9, 'reference' => 'MY'.mt_rand(100000, 999999)],
+            ['status' => OrderStatus::AwaitingPayment, 'paid' => false, 'method' => 'cash', 'ago' => 1, 'notes' => 'No onions please.'],
+            ['status' => OrderStatus::AwaitingPayment, 'paid' => false, 'method' => 'gcash', 'ago' => 3],
+            ['status' => OrderStatus::AwaitingPayment, 'paid' => false, 'method' => 'maya', 'ago' => 5, 'reference' => 'MY'.mt_rand(100000, 999999)],
+            ['status' => OrderStatus::AwaitingPayment, 'paid' => false, 'method' => 'gcash', 'ago' => 2, 'delivery' => true],
             ['status' => OrderStatus::InProgress, 'paid' => true, 'method' => 'gcash', 'ago' => 14],
-            ['status' => OrderStatus::ReadyToServe, 'paid' => false, 'method' => 'cash', 'ago' => 22],
-            ['status' => OrderStatus::ReadyToServe, 'paid' => true, 'method' => 'gcash', 'ago' => 30],
+            ['status' => OrderStatus::InProgress, 'paid' => true, 'method' => 'cash', 'ago' => 16],
+            ['status' => OrderStatus::ReadyToServe, 'paid' => true, 'method' => 'cash', 'ago' => 22],
+            ['status' => OrderStatus::ReadyToServe, 'paid' => true, 'method' => 'maya', 'ago' => 26, 'delivery' => true],
+            ['status' => OrderStatus::ReadyToServe, 'paid' => true, 'method' => 'gcash', 'ago' => 30, 'delivery' => true],
             ['status' => OrderStatus::Completed, 'paid' => true, 'method' => 'cash', 'ago' => 55],
             ['status' => OrderStatus::Completed, 'paid' => true, 'method' => 'cash', 'ago' => 80],
             ['status' => OrderStatus::Completed, 'paid' => true, 'method' => 'maya', 'ago' => 110],
@@ -257,19 +276,29 @@ class MockDataSeeder extends Seeder
     }
 
     /**
-     * @param  array{status: OrderStatus, paid: bool, method: string, notes?: string, reference?: string}  $spec
+     * @param  array{status: OrderStatus, paid: bool, method: string, notes?: string, reference?: string, delivery?: bool}  $spec
      */
     private function makeOrder(Canteen $canteen, Collection $items, User $cashier, array $spec, Carbon $createdAt): Order
     {
         $lines = $items->shuffle()->take(mt_rand(1, 4));
 
+        $zones = ($spec['delivery'] ?? false)
+            ? DeliveryZone::withoutGlobalScopes()->where('canteen_id', $canteen->id)->where('is_active', true)->orderBy('id')->get()
+            : collect();
+        $zone = $zones->isNotEmpty() ? $zones[mt_rand(0, $zones->count() - 1)] : null;
+        $floor = $zone ? mt_rand(1, $zone->floors) : null;
+        $feeCents = $zone ? $zone->feeCentsForFloor($floor) : 0;
+        $phone = '09'.mt_rand(10, 99).mt_rand(1000000, 9999999);
+
         $order = Order::create([
             'canteen_id' => $canteen->id,
             'customer_name' => $this->pick($this->names),
-            'phone' => '09'.mt_rand(10, 99).mt_rand(1000000, 9999999),
-            'building' => $this->pick($this->buildings),
-            'room' => (string) (mt_rand(1, 4) * 100 + mt_rand(1, 20)),
-            'type' => OrderType::TakeAway,
+            'phone' => $phone,
+            'phone_key' => PhoneKey::from($phone),
+            'building' => $zone?->name,
+            'floor' => $floor,
+            'room' => $zone ? (string) (mt_rand(1, 4) * 100 + mt_rand(1, 20)) : null,
+            'type' => $zone ? OrderType::Delivery : OrderType::TakeAway,
             'status' => $spec['status'],
             'notes' => $spec['notes'] ?? null,
             'payment_choice' => $spec['method'],
@@ -292,7 +321,9 @@ class MockDataSeeder extends Seeder
             $total += (float) $item->price * $quantity;
         }
 
-        $update = ['total' => $total];
+        $total += $feeCents / 100;
+
+        $update = ['total' => $total, 'delivery_fee' => $feeCents / 100];
 
         if (isset($spec['reference'])) {
             $update['customer_payment_ref'] = $spec['reference'];

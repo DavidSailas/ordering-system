@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             MockDataSeeder::class,
             SchoolMemberSeeder::class,
+            DemoSecuritySeeder::class,
         ]);
     }
 }

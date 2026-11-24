@@ -18,7 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Railway terminates HTTPS at its proxy; trust it so Laravel builds https:// URLs.
-        $middleware->trustProxies(at: '*');
+        // TRUSTED_PROXIES can list the hosting provider's proxy addresses (comma separated). Left empty it trusts
+        // every proxy, which is fine on Railway; the limits that matter most (strikes, ID lock-out) do not use the IP anyway.
+        $middleware->trustProxies(at: ($proxies = env('TRUSTED_PROXIES', '*')) === '*' ? '*' : array_map('trim', explode(',', (string) $proxies)));
 
         $middleware->alias([
             'role' => EnsureUserHasRole::class,

@@ -1,0 +1,23 @@
+CECILIAN BITES - UPDATE v5 (final cleanup)
+Delivery fees + pay-first + automatic strikes + ID tap + go-live tools. CUMULATIVE: replaces any earlier zip.
+
+1. Back up your project (or commit to git).
+2. Unzip over your project folder, keeping the folders.
+3. php artisan migrate
+   php artisan test
+4. php artisan canteen:preflight      <- new: safety check before a demo or going live
+
+FOR THE PRESENTATION
+   docs/DEMO-WALKTHROUGH.md   10-minute script with the demo logins and school IDs
+   php artisan migrate:fresh --seed   (right before the demo; the seed data now follows the new rules)
+   php artisan schedule:work          (second window, so unpaid orders cancel on time)
+
+FOR GOING LIVE
+   docs/GO-LIVE-CHECKLIST.md
+   .env.production.example   (APP_DEBUG=false, APP_TIMEZONE=Asia/Manila, secure cookies, real email...)
+   * Do NOT run the seeders on the live database.
+   * APP_TIMEZONE is Asia/Manila in .env.example now; your own .env still says UTC, so change it.
+
+NOTES
+   * 6 tests in tests/Feature/SchoolIdTest.php stay skipped on purpose (login-based account flow).
+   * ADMIN_REGISTRATION_CODE / PUBLIC_STAFF_REGISTRATION are not read anywhere in the code; leave them empty.

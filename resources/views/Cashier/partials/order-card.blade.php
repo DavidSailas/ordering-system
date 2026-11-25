@@ -51,15 +51,15 @@
     @endif
 
     @if ($order->schoolMember)
-        <div class="order-loc"><x-icon name="users" class="ui-i" /> ID {{ $order->schoolMember->id_number }} · {{ ucfirst($order->schoolMember->kind) }}</div>
+        <div class="order-flag"><x-icon name="users" class="ui-i" /> ID {{ $order->schoolMember->id_number }} · {{ ucfirst($order->schoolMember->kind) }}</div>
     @endif
 
     @if ($order->isAwaitingPayment())
-        <div class="order-loc" style="color:#b45309;font-weight:700"><x-icon name="wallet" class="ui-i" /> Do not prepare yet · cancels itself {{ $order->autoCancelAt()->diffForHumans() }}</div>
+        <div class="order-flag order-flag--wait"><x-icon name="wallet" class="ui-i" /> Do not prepare yet · cancels itself {{ $order->autoCancelAt()->diffForHumans() }}</div>
     @endif
 
     @if ($order->isAwaitingPayment() && ($missed = max((($strikes ?? collect())[$order->phone_key] ?? 0), (($memberStrikes ?? collect())[$order->school_member_id] ?? 0))) > 0)
-        <div class="order-loc" style="color:#b91c1c;font-weight:700"><x-icon name="alert" class="ui-i" /> {{ $missed }} missed {{ Str::plural('order', $missed) }} before ({{ \App\Support\Strikes::max() }} = paused)</div>
+        <div class="order-flag order-flag--bad"><x-icon name="alert" class="ui-i" /> {{ $missed }} missed {{ Str::plural('order', $missed) }} before ({{ \App\Support\Strikes::max() }} = paused)</div>
     @endif
 
     <ul class="order-items">

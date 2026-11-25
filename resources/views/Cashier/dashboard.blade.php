@@ -26,6 +26,12 @@
                 <span class="ui-badge {{ $unpaidCount ? 'ui-badge--brand' : '' }}">{{ $unpaidCount }} unpaid</span>
             </div>
 
+            <div class="board-tabs" role="tablist" aria-label="Order columns">
+                @foreach ([['Waiting', $awaiting->count(), true], ['Preparing', $preparing->count(), false], ['Ready', $ready->count(), false], ['Done', $finished->count(), false]] as $i => [$tabLabel, $tabCount, $tabAlert])
+                    <button type="button" role="tab" class="board-tab" data-col="{{ $i }}" aria-selected="false" @if ($tabAlert && $tabCount) data-alert @endif><span>{{ $tabLabel }}</span><span class="ui-count">{{ $tabCount }}</span></button>
+                @endforeach
+            </div>
+
             <div class="board">
                 <section class="board-col" aria-label="Waiting for payment">
                     <div class="board-col-head"><x-icon name="wallet" class="ui-i" />Waiting for payment<span class="ui-count">{{ $awaiting->count() }}</span></div>
@@ -80,6 +86,31 @@
             var toast = document.getElementById('new-order-toast');
             var baseTitle = document.title;
             var busy = false;
+            var currentCol = null;   // the column chosen on a phone; kept when the board refreshes itself
+
+            // Phones show one column at a time. The tabs are drawn by the server, so they are re-applied after every refresh.
+            function applyTabs() {
+                var board = document.getElementById('board');
+                if (!board) return;
+                var cols = board.querySelectorAll('.board-col');
+                var tabs = board.querySelectorAll('.board-tab');
+                if (currentCol === null) {   // first time: open the first column that has orders
+                    currentCol = 0;
+                    for (var i = 0; i < cols.length; i++) { if (cols[i].querySelector('.order')) { currentCol = i; break; } }
+                }
+                board.classList.add('js-tabs');
+                for (var c = 0; c < cols.length; c++) { cols[c].classList.toggle('is-current', c === currentCol); }
+                for (var t = 0; t < tabs.length; t++) {
+                    tabs[t].classList.toggle('is-on', t === currentCol);
+                    tabs[t].setAttribute('aria-selected', t === currentCol ? 'true' : 'false');
+                }
+            }
+            wrap.addEventListener('click', function (e) {
+                var tab = e.target.closest ? e.target.closest('.board-tab') : null;
+                if (!tab) return;
+                currentCol = parseInt(tab.dataset.col, 10) || 0;
+                applyTabs();
+            });
 
             function beep() {
                 try {
@@ -105,6 +136,7 @@
 
                         var newer = parseInt(next.dataset.newest || '0', 10) > parseInt(current.dataset.newest || '0', 10);
                         wrap.replaceChild(next, current);
+                        applyTabs();
 
                         if (newer) {
                             toast.hidden = false;
@@ -117,6 +149,7 @@
                     .then(function () { busy = false; });
             }
 
+            applyTabs();
             setInterval(refresh, 20000);
             document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh(); });
         })();

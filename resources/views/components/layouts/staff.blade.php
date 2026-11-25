@@ -70,6 +70,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('ui.css') }}?v={{ @filemtime(public_path('ui.css')) }}">
     <link rel="stylesheet" href="{{ asset('staff-mobile.css') }}?v={{ @filemtime(public_path('staff-mobile.css')) }}">
+    <link rel="stylesheet" href="{{ asset('polish.css') }}?v={{ @filemtime(public_path('polish.css')) }}">
     @if (! empty($canteenAccentCss))<style>:root{ {!! $canteenAccentCss !!} }</style>@endif
 </head>
 <body class="ui-body{{ $hideTabs ? ' has-no-tabs' : '' }}">

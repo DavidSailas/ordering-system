@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ asset('ui.css') }}?v={{ @filemtime(public_path('ui.css')) }}">
     <link rel="stylesheet" href="{{ asset('clean-scrollbars.css') }}">
     <link rel="stylesheet" href="{{ asset('mobile.css') }}?v={{ @filemtime(public_path('mobile.css')) }}">
+    <link rel="stylesheet" href="{{ asset('polish.css') }}?v={{ @filemtime(public_path('polish.css')) }}">
     @if (! empty($canteenAccentCss))<style>:root{ {!! $canteenAccentCss !!} }</style>@endif
 </head>
 <body>

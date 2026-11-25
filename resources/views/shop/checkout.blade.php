@@ -43,6 +43,7 @@
         <section class="co-card">
             <header class="co-card-head"><span class="co-num">1</span><div><h2>Your details</h2><p>Tap or scan your school ID, or just type your name.</p></div></header>
             @php($idRequired = \App\Support\SchoolId::required())
+            <div class="co-id">
             <div class="co-grid">
                 <label class="co-field">
                     <span class="co-label">School ID @unless($idRequired)<em>optional</em>@endunless</span>
@@ -54,9 +55,10 @@
                     <input id="school-last" name="school_last_name" autocomplete="family-name" maxlength="80" value="{{ old('school_last_name') }}" placeholder="e.g. Dela Cruz">
                 </label>
             </div>
-            <p class="co-note" style="margin:2px 0 14px">With your school ID we fill in your name for you. The last name keeps other people from using your ID.</p>
-            <button type="button" id="scan-id" class="co-edit" hidden style="margin:0 0 14px">Scan my ID with the camera</button>
-            <video id="scan-video" hidden playsinline muted style="width:100%;max-height:240px;margin:0 0 14px;border-radius:12px;background:#000"></video>
+            <p class="co-help">With your school ID we fill in your name for you. The last name keeps other people from using your ID.</p>
+            <button type="button" id="scan-id" class="co-scan" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Scan my ID with the camera</button>
+            <video id="scan-video" class="co-video" hidden playsinline muted></video>
+            </div>
             <div class="co-grid">
                 <label class="co-field">
                     <span class="co-label">Full name</span>
@@ -93,7 +95,7 @@
                 @error('fulfillment')<small class="co-error">{{ $message }}</small>@enderror
             </fieldset>
             @unless($canDeliver)
-                <p class="co-note" style="margin-top:12px">Delivery is not available right now. You can still order for pickup.</p>
+                <p class="co-help" style="margin-top:12px">Delivery is not available right now. You can still order for pickup.</p>
             @endunless
 
             @if($canDeliver)
@@ -121,7 +123,7 @@
                         <input name="room" maxlength="40" value="{{ old('room', session('shop.profile.room', '')) }}" placeholder="e.g. 804" @class(['has-error' => $errors->has('room')])>
                         @error('room')<small class="co-error">{{ $message }}</small>@enderror
                     </label>
-                    <p class="co-note">The delivery fee depends on how far the runner has to go, and is shown in the summary.</p>
+                    <p class="co-help">The delivery fee depends on how far the runner has to go, and is shown in the summary.</p>
                 </div>
             @endif
 
@@ -150,7 +152,7 @@
                         </label>
                     @endforeach
                 </div>
-                <p class="co-note" id="pay-note" style="margin-top:10px;{{ $mode === 'delivery' ? '' : 'display:none' }}">Delivery orders are paid in advance with GCash or Maya, so the runner only brings orders that are already paid.</p>
+                <p class="co-help" id="pay-note" style="margin-top:10px;{{ $mode === 'delivery' ? '' : 'display:none' }}">Delivery orders are paid in advance with GCash or Maya, so the runner only brings orders that are already paid.</p>
                 @error('payment_choice')<small class="co-error">{{ $message }}</small>@enderror
             </fieldset>
         </section>

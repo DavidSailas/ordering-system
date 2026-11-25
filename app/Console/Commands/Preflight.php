@@ -31,6 +31,10 @@ class Preflight extends Command
 
     public function handle(): int
     {
+        // The command object is reused if it runs twice in one process (as in the tests), so start from zero.
+        $this->fails = 0;
+        $this->warnings = 0;
+
         $this->line('<options=bold>Cecilian Bites: safety check</>');
         $this->newLine();
 

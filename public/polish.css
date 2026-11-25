@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Cecilian Bites: mobile polish (customer pages and staff pages)
+   Loaded last, so it only refines what ui.css, customer.css, mobile.css and
+   staff-mobile.css already do. Nothing here changes the desktop layout unless
+   a rule says so.
+   ========================================================================== */
+
+/* ---- Touch: no double-tap zoom delay on anything tappable ---- */
+a, button, summary, label, .ui-btn, .button, .pay-method, .board-tab { touch-action: manipulation; }
+
+/* ---- Long names, rooms and messages must wrap instead of pushing the page sideways ---- */
+.order-who, .order-loc, .order-flag, .co-help, .co-error { overflow-wrap: anywhere; }
+
+/* ==========================================================================
+   Checkout
+   ========================================================================== */
+
+/* Helper text inside a card (the older .co-note is a centred footnote for the order summary) */
+.co-help { margin: 6px 0 0; color: var(--muted, #6b7385); font-size: 13px; line-height: 1.5; text-align: left; }
+
+/* "Tap your school ID" panel */
+.co-id { margin-bottom: 18px; padding: 14px; border: 1px dashed var(--brand-line, #fae4d7); border-radius: 14px; background: var(--brand-tint, #fdf3ee); }
+.co-id .co-grid { margin-bottom: 0; }
+.co-id .co-field input { background: #fff; }
+.co-id .co-help { margin-top: 10px; }
+
+/* Camera scan button (only shown where the browser can read barcodes) */
+.co-scan { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; margin-top: 12px; padding: 10px 16px; border: 1.5px solid var(--brand, #e25806); border-radius: 12px; background: #fff; color: var(--brand-dark, #9e3e04); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+.co-scan[hidden] { display: none; }
+.co-scan svg { flex: none; width: 20px; height: 20px; }
+.co-scan:active { background: var(--brand-tint, #fdf3ee); }
+.co-scan:disabled { opacity: .6; cursor: progress; }
+.co-video { display: block; width: 100%; max-height: 260px; margin-top: 12px; border-radius: 12px; background: #000; object-fit: cover; }
+.co-video[hidden] { display: none; }
+
+/* A payment choice that is not available (cash for delivery) must look switched off */
+.pay-method:has(input:disabled) { opacity: .45; cursor: not-allowed; }
+.pay-method:has(input:disabled) * { cursor: not-allowed; }
+
+/* ==========================================================================
+   Cashier board
+   ========================================================================== */
+
+/* Small status lines on an order card: school ID, "do not prepare yet", missed orders */
+.order-flag { display: flex; align-items: flex-start; gap: 8px; padding: 7px 10px; border-radius: 9px; background: var(--line-2, #f1f2f6); color: var(--ink-2, #3b4252); font-size: 13px; font-weight: 650; line-height: 1.4; }
+.order-flag .ui-i { flex: none; width: 15px; height: 15px; margin-top: 2px; }
+.order-flag--wait { background: #fff4e0; color: #92400e; }
+.order-flag--bad { background: var(--bad-bg, #fee2e2); color: var(--bad, #b91c1c); }
+
+/* Column switcher: hidden on big screens, where all four columns sit side by side */
+.board-tabs { display: none; }
+
+/* ==========================================================================
+   Phones and small tablets
+   ========================================================================== */
+@media (max-width: 900px) {
+  /* Cashier board: one column at a time, chosen with four big tabs, instead of four columns stacked in one long scroll */
+  .board-tabs { position: sticky; top: calc(56px + env(safe-area-inset-top, 0px)); z-index: 20; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0 -14px 12px; padding: 8px 14px; background: var(--bg, #f4f5f8); }
+  .board-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 54px; padding: 6px 2px; border: 1px solid var(--line, #e3e6ec); border-radius: 12px; background: #fff; color: var(--muted, #6b7385); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .board-tab .ui-count { min-width: 24px; padding: 1px 7px; border-radius: 99px; background: var(--line-2, #f1f2f6); color: var(--ink, #1f2430); font-size: 13px; text-align: center; }
+  .board-tab[data-alert] .ui-count { background: var(--brand, #e25806); color: #fff; }
+  .board-tab.is-on { border-color: var(--brand, #e25806); background: var(--brand-50, #fdf3ee); color: var(--brand-700, #9e3e04); }
+  .board-tab.is-on .ui-count { background: var(--brand, #e25806); color: #fff; }
+  #board > .board-chips { display: none; }          /* the tabs already show the counts */
+  .board.js-tabs .board-col { display: none; padding: 0; background: transparent; }
+  .board.js-tabs .board-col.is-current { display: block; }
+  .board.js-tabs .board-col-head { display: none; }
+
+  /* Easier to hit with a thumb, and a little feedback when pressed */
+  .dz-btn, .os-btn, .order-report-btn, .co-scan { min-height: 44px; }
+  .ui-btn:active, .button:active, .dz-btn:active, .os-btn:active { transform: scale(.98); }
+
+  /* Page content: leave room for the sticky buttons and the tab bar */
+  .ui-content { padding-bottom: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-btn:active, .button:active, .dz-btn:active, .os-btn:active { transform: none; }
+}
